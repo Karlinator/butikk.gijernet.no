@@ -1,0 +1,21 @@
+name: CI - Cloud
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'functions/**'
+
+jobs:
+  main:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@master
+      - name: Deploy to Firebase
+        uses: chrissank/deploy-firebase-functions@1.0.0
+        env:
+          FIREBASE_TOKEN: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIJERNET_NO }}'
+          TARGET: default
