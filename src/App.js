@@ -1,5 +1,4 @@
 import React from "react";
-import Browse from "./browse/Browse";
 import Cart from "./cart/Cart";
 
 function App() {
