@@ -31,7 +31,7 @@ const products = [
         variant: "ekstraordinær",
         image: "/logo512.png",
         quantity: 7,
-        price: 200
+        price: 152
     },
     {
         name: "Test4",
