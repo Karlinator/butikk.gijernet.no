@@ -11,6 +11,10 @@ import {
 } from "@material-ui/core";
 import {AddShoppingCart, ArrowBack} from "@material-ui/icons";
 import {makeStyles} from "@material-ui/core/styles";
+import {
+    useParams,
+    Link
+} from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -45,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
     forms: {
         marginTop: 10,
         marginBottom: 10,
+    },
+    link: {
+        color: 'inherit',
     }
 }));
 
@@ -97,15 +104,20 @@ const product = {
 }
 
 const ProductPage = () => {
+    const classes = useStyles();
+    let {id} = useParams();
     return(
         <div>
             <AppBar position="sticky">
                 <Toolbar>
-                    <IconButton color="inherit" edge="start" aria-label="tilbake">
-                        <ArrowBack />
-                    </IconButton>
+                    <Link to="/" className={classes.link}>
+                        <IconButton color="inherit" edge="start" aria-label="tilbake">
+                            <ArrowBack />
+                        </IconButton>
+                    </Link>
                 </Toolbar>
             </AppBar>
+            {id}
             <Product product={product} />
         </div>
     )
@@ -150,7 +162,7 @@ const Product = (props) => {
     )
 }
 
-const Controls = (props) => {
+const Controls = () => {
     const classes = useStyles();
     return (
         <Paper variant="outlined">

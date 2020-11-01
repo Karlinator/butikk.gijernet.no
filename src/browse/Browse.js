@@ -3,23 +3,24 @@ import Feed from "./Feed";
 import {makeStyles} from "@material-ui/core/styles";
 import Controls from "./Controls";
 import clsx from "clsx";
-import {AppBar, CssBaseline, Drawer, IconButton, Toolbar, Typography} from "@material-ui/core";
-import {Clear, FilterList} from "@material-ui/icons";
+import {AppBar, Drawer, IconButton, Toolbar, Typography} from "@material-ui/core";
+import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
+import {Link} from "react-router-dom";
 
 const drawerWidth = 240;
 
 const testData = {
     products: [
-        {title: 'test', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test2', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test3', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test4', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test5', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test6', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test7', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test8', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test9', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'dashjkas', title: 'test', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'gfsd', title: 'test2', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'hdfsg', title: 'test3', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'sdf', title: 'test4', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'dsghgdf', title: 'test5', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'gdsazfg', title: 'test6', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'hser', title: 'test7', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: '245654', title: 'test8', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'dfzbhg', title: 'test9', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+        {id: 'sd<fsd', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
     ]
 }
 
@@ -31,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
         marginRight: theme.spacing(2),
     },
     appBar: {
-        zIndex: theme.zIndex.drawer + 1,
+        zIndex: theme.zIndex.drawer + 1
     },
     hide: {
         display: 'none',
@@ -62,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.leavingScreen,
         }),
         marginLeft: -drawerWidth,
+        marginTop: 40
     },
     contentShift: {
         transition: theme.transitions.create('margin', {
@@ -69,7 +71,14 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.enteringScreen,
         }),
         marginLeft: 0,
+        marginTop: 40
     },
+    headline: {
+        flexGrow: 1,
+    },
+    link: {
+        color: 'inherit',
+    }
 }));
 
 const Browse = () => {
@@ -82,7 +91,6 @@ const Browse = () => {
 
     return (
         <div className={classes.root}>
-            <CssBaseline />
             <AppBar
                 position="fixed"
                 className={clsx(classes.appBar)}
@@ -97,9 +105,18 @@ const Browse = () => {
                     >
                         <FilterList />
                     </IconButton>
-                    <Typography variant="h6" noWrap>
+                    <Typography variant="h6" noWrap className={classes.headline}>
                         Gi Jernet Nettbutikk
                     </Typography>
+                    <Link to="/cart" className={classes.link}>
+                        <IconButton
+                            color="inherit"
+                            aria-label="handlevogn"
+                            edge="end"
+                        >
+                            <ShoppingCart />
+                        </IconButton>
+                    </Link>
                 </Toolbar>
             </AppBar>
             <Drawer

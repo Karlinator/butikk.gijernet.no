@@ -14,6 +14,7 @@ import {
     TextField, Button,
 } from "@material-ui/core";
 import {ArrowBack} from "@material-ui/icons";
+import {Link} from "react-router-dom";
 
 const useStyles = makeStyles({
     table: {
@@ -24,6 +25,9 @@ const useStyles = makeStyles({
     },
     number: {
         width: 70,
+    },
+    link: {
+        color: 'inherit',
     }
 });
 
@@ -60,13 +64,16 @@ const products = [
 
 
 const Cart = () => {
+    const classes = useStyles();
     return (
         <div>
             <AppBar position="sticky">
                 <Toolbar>
-                    <IconButton color="inherit" edge="start" aria-label="tilbake">
-                        <ArrowBack />
-                    </IconButton>
+                    <Link to="/" className={classes.link}>
+                        <IconButton color="inherit" edge="start" aria-label="tilbake">
+                            <ArrowBack />
+                        </IconButton>
+                    </Link>
                 </Toolbar>
             </AppBar>
             <Container>
