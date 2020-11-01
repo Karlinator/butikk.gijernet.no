@@ -5,10 +5,11 @@ name: Deploy to Firebase Hosting on merge
 'on':
   push:
     branches:
-      - master2
+      - master
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     steps:
       - uses: actions/checkout@v2
       - run: npm ci && npm run build
