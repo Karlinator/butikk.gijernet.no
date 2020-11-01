@@ -9,6 +9,9 @@ import Cart from "./cart/Cart";
 import Browse from "./browse/Browse";
 
 function App() {
+    if (!window.localStorage.getItem('cart')) {
+        window.localStorage.setItem('cart', '[]')
+    }
     return (
         <div className="App">
             <Router>

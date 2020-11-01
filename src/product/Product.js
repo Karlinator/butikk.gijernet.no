@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {
     AppBar,
     Container,
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
         flexWrap: 'nowrap',
         // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
         transform: 'translateZ(0)',
-        width: '100%',
+        width: '1000',
         height: 'auto',
     },
     title: {
@@ -126,6 +126,8 @@ const ProductPage = () => {
 const Product = (props) => {
     const classes = useStyles();
 
+    const [selected, setSelected] = useState(props.product.variants[0].id);
+
     const theme = useTheme();
     const size = {
         xl: useMediaQuery(theme.breakpoints.up('xl')),
@@ -155,7 +157,7 @@ const Product = (props) => {
             <Container>
                 <img className={classes.coverImg} alt={props.product.title} src={props.product.image} />
             </Container>
-            <GridList className={classes.gridList} cols={getGridListCols}>
+            <GridList className={classes.gridList}>
                 {props.product.variants.map((tile) => (
                     <GridListTile cols={0.5} rows={0.8}  key={tile.id}>
                         <img className={classes.img} alt="" src={tile.img} />
@@ -180,15 +182,35 @@ const Product = (props) => {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} md={3}>
-                    <Controls />
+                    <Controls id={selected} />
                 </Grid>
             </Grid>
         </Container>
     )
 }
 
-const Controls = () => {
+const Controls = (props) => {
     const classes = useStyles();
+
+    const [num, setNum] = useState(0);
+
+    const handleNumChange = (event) => {
+        setNum(event.target.value)
+    }
+
+    const handleAddToCart = () => {
+        let cart = JSON.parse(window.localStorage.getItem('cart'));
+        const i = cart.findIndex(p => p.id === props.id);
+        if (i !== -1) {
+            cart[i].num = parseInt(cart[i].num) + parseInt(num);
+        } else {
+            cart.push({id: props.id, num: num});
+        }
+        const cartJSON = JSON.stringify(cart);
+        console.log(cartJSON)
+        window.localStorage.setItem('cart', cartJSON);
+    }
+
     return (
         <Paper variant="outlined">
             <Container>
@@ -197,6 +219,8 @@ const Controls = () => {
                     type="number"
                     label="Antall"
                     size="small"
+                    value={num}
+                    onChange={handleNumChange}
                     className={classes.forms}
                 />
             </Container>
@@ -206,6 +230,7 @@ const Controls = () => {
                     color="primary"
                     startIcon={<AddShoppingCart/>}
                     className={classes.forms}
+                    onClick={handleAddToCart}
                 >
                     Legg i handlevogn
                 </Button>
