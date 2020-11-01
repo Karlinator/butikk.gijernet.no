@@ -7,9 +7,9 @@ import {
     IconButton,
     Toolbar,
     GridListTileBar,
-    Typography, Grid, Paper, TextField, Button, useMediaQuery, useTheme
+    Typography, Grid, Paper, TextField, Button, useMediaQuery, useTheme, Hidden
 } from "@material-ui/core";
-import {AddShoppingCart, ArrowBack} from "@material-ui/icons";
+import {AddShoppingCart, ArrowBack, ShoppingCart} from "@material-ui/icons";
 import {makeStyles} from "@material-ui/core/styles";
 import {
     useParams,
@@ -47,11 +47,18 @@ const useStyles = makeStyles((theme) => ({
         height: 'auto',
     },
     forms: {
-        marginTop: 10,
-        marginBottom: 10,
+        marginTop: 25,
+        marginBottom: 25,
+        marginRight: 40
     },
     link: {
         color: 'inherit',
+    },
+    headline: {
+        flexGrow: 1,
+    },
+    bottom: {
+        marginBottom: 300,
     }
 }));
 
@@ -107,12 +114,24 @@ const ProductPage = () => {
     const classes = useStyles();
     let {id} = useParams();
     return(
-        <div>
+        <div className={classes.bottom}>
             <AppBar position="sticky">
                 <Toolbar>
                     <Link to="/" className={classes.link}>
                         <IconButton color="inherit" edge="start" aria-label="tilbake">
                             <ArrowBack />
+                        </IconButton>
+                    </Link>
+                    <Typography variant="h6" noWrap className={classes.headline}>
+                        Gi Jernet Nettbutikk
+                    </Typography>
+                    <Link to="/cart" className={classes.link}>
+                        <IconButton
+                            color="inherit"
+                            aria-label="handlevogn"
+                            edge="end"
+                        >
+                            <ShoppingCart />
                         </IconButton>
                     </Link>
                 </Toolbar>
@@ -176,14 +195,21 @@ const Product = (props) => {
                 <Typography variant="h4" component="h2">kr{props.product.price}</Typography>
             </Container>
             <Grid container spacing={3}>
-                <Grid item xs={12} md={9}>
+                <Hidden mdUp>
+                    <Grid item xs={12}>
+                        <Controls id={selected} />
+                    </Grid>
+                </Hidden>
+                <Grid item xs={12} md={8}>
                     <Typography variant="body1">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent at viverra mi, ac dapibus lorem. Sed viverra tempor nulla vel maximus. Vestibulum quis commodo neque. Quisque quis nisi pellentesque sapien maximus sodales dignissim id justo. Vestibulum sed imperdiet ex, eu convallis elit. Cras vitae libero cursus, tincidunt ipsum eu, eleifend nulla. Nullam eu ligula id ipsum tristique porta sit amet ac eros. Phasellus vestibulum lectus in porta eleifend. Cras eget volutpat tellus. Morbi facilisis risus ac odio eleifend consequat.
                     </Typography>
                 </Grid>
-                <Grid item xs={12} md={3}>
-                    <Controls id={selected} />
-                </Grid>
+                <Hidden smDown>
+                    <Grid item md={4}>
+                        <Controls id={selected} />
+                    </Grid>
+                </Hidden>
             </Grid>
         </Container>
     )
@@ -223,8 +249,6 @@ const Controls = (props) => {
                     onChange={handleNumChange}
                     className={classes.forms}
                 />
-            </Container>
-            <Container>
                 <Button
                     variant="contained"
                     color="primary"
