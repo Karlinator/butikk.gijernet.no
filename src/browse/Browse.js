@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Feed from "./Feed";
 import {makeStyles} from "@material-ui/core/styles";
 import Controls from "./Controls";
@@ -11,27 +11,16 @@ import {
     Toolbar,
     Typography,
     useMediaQuery,
-    useTheme
+    useTheme,
+    CircularProgress,
+    Container,
+    Fade
 } from "@material-ui/core";
 import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 
 const drawerWidth = 240;
 
-const testData = {
-    products: [
-        {id: 'dashjkas', title: 'test', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'gfsd', title: 'test2', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'hdfsg', title: 'test3', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'sdf', title: 'test4', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'dsghgdf', title: 'test5', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'gdsazfg', title: 'test6', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'hser', title: 'test7', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: '245654', title: 'test8', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'dfzbhg', title: 'test9', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {id: 'sd<fsd', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-    ]
-}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -87,13 +76,51 @@ const useStyles = makeStyles((theme) => ({
     },
     link: {
         color: 'inherit',
+    },
+    center: {
+        marginLeft: '40%',
+        marginTop: 50,
     }
+
 }));
 
-const Browse = (props) => {
+const Browse = () => {
     const classes = useStyles();
     const [open, setOpen] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [overlayOpen, setOverlayOpen] = useState(false);
+
+    const [feed, setFeed] = useState(
+        <Container className={classes.headline}>
+            <Fade
+                in={loading}
+                className={classes.center}
+                style={{
+                    transitionDelay: loading ? '800ms' : '0ms',
+                }}
+                unmountOnExit
+            >
+                <CircularProgress />
+            </Fade>
+        </Container>);
+
+    useEffect(() => {
+        fetch('/api/products')
+            .then(res => res.json())
+            .then(
+                result => {
+                    console.log(result);
+                    setLoading(false);
+                    setFeed(<Feed products={result.products}/>);
+                },
+                (error) => {
+                    setLoading(false);
+                    setFeed(error);
+                }
+            )
+    }, []);
+
+
 
     const theme = useTheme();
     const small = useMediaQuery(theme.breakpoints.down("xs"));
@@ -199,7 +226,7 @@ const Browse = (props) => {
                     [classes.contentShift]: open,
                 })}
             >
-                <Feed products={testData.products}/>
+                {feed}
             </main>
         </div>
     )
