@@ -1,7 +1,7 @@
 {
   "hosting": {
+    "target": "store",
     "public": "build",
-    "target": "gijernet-store",
     "ignore": [
       "firebase.json",
       "**/.*",
