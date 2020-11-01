@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import {
     TableCell,
@@ -11,7 +11,7 @@ import {
     AppBar,
     Toolbar,
     IconButton,
-    TextField, Button,
+    TextField, Button, Fade, CircularProgress,
 } from "@material-ui/core";
 import {ArrowBack} from "@material-ui/icons";
 import {Link} from "react-router-dom";
@@ -28,7 +28,11 @@ const useStyles = makeStyles({
     },
     link: {
         color: 'inherit',
-    }
+    },
+    center: {
+        marginLeft: '40%',
+        marginTop: 50,
+    },
 });
 
 const products = [
@@ -65,6 +69,41 @@ const products = [
 
 const Cart = () => {
     const classes = useStyles();
+
+    const [loading, setLoading] = useState(true);
+
+    const [cart, setCart] = useState(
+        <Container className={classes.headline}>
+            <Fade
+                in={loading}
+                className={classes.center}
+                style={{
+                    transitionDelay: loading ? '800ms' : '0ms',
+                }}
+                unmountOnExit
+            >
+                <CircularProgress />
+            </Fade>
+        </Container>
+    );
+
+    useEffect(() => {
+        const cartList = JSON.parse(window.localStorage.getItem('cart'));
+        const skuList = cartList.map(item => item.id);
+        fetch('/api/productDetails', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(skuList)
+        })
+            .then(result => result.json())
+            .then(result => {
+                setLoading(false);
+                setCart(<CartList products={result.products}/>);
+            })
+    }, [])
+
     return (
         <div>
             <AppBar position="sticky">
@@ -77,7 +116,7 @@ const Cart = () => {
                 </Toolbar>
             </AppBar>
             <Container>
-                <CartList products={products} shipping={149} />
+                {cart}
                 <Button variant="contained" color="primary">Kjøp</Button>
             </Container>
         </div>

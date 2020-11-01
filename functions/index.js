@@ -23,3 +23,36 @@ exports.products = functions.https.onRequest((request, response) => {
             {id: 'sd<fsd', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
         ]}));
 })
+
+exports.productDetails = functions.https.onRequest((request, response) => {
+    response.send(JSON.stringify({products: [
+        {
+            name: "Test",
+            variant: "vanlig",
+            image: "/logo512.png",
+            quantity: 5,
+            price: 200
+        },
+        {
+            name: "Test2",
+            variant: "vanlig",
+            image: "/logo512.png",
+            quantity: 5,
+            price: 152
+        },
+        {
+            name: "Test3",
+            variant: "ekstraordinær",
+            image: "/logo512.png",
+            quantity: 7,
+            price: 200
+        },
+        {
+            name: "Test4",
+            variant: "vanlig",
+            image: "/logo512.png",
+            quantity: 69,
+            price: 420
+        },
+    ]}));
+})
