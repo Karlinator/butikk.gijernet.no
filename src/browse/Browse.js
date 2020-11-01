@@ -3,7 +3,16 @@ import Feed from "./Feed";
 import {makeStyles} from "@material-ui/core/styles";
 import Controls from "./Controls";
 import clsx from "clsx";
-import {AppBar, Drawer, IconButton, Toolbar, Typography} from "@material-ui/core";
+import {
+    AppBar,
+    Drawer,
+    Hidden,
+    IconButton,
+    Toolbar,
+    Typography,
+    useMediaQuery,
+    useTheme
+} from "@material-ui/core";
 import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 
@@ -81,12 +90,22 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Browse = () => {
+const Browse = (props) => {
     const classes = useStyles();
     const [open, setOpen] = useState(true);
+    const [overlayOpen, setOverlayOpen] = useState(false);
+
+    const theme = useTheme();
+    const small = useMediaQuery(theme.breakpoints.down("xs"));
 
     const handleDrawerToggle = () => {
-        setOpen(!open);
+        console.log(small);
+        if (!small) {
+            setOpen(!open);
+        } else {
+            setOpen(true);
+            setOverlayOpen(!overlayOpen)
+        }
     };
 
     return (
@@ -119,32 +138,62 @@ const Browse = () => {
                     </Link>
                 </Toolbar>
             </AppBar>
-            <Drawer
-                className={classes.drawer}
-                variant="persistent"
-                anchor="left"
-                open={open}
-                classes={{
-                    paper: classes.drawerPaper,
-                }}
-            >
-                <Toolbar/>
-                <Toolbar className={classes.drawerHeader}>
-                    <Typography
-                        variant="h5"
-                    >
-                        Søkefilter
-                    </Typography>
-                    <IconButton
-                        onClick={handleDrawerToggle}
-                        edge="end"
-                        className={classes.menuButton}
-                    >
-                        <Clear />
-                    </IconButton>
-                </Toolbar>
-                <Controls/>
-            </Drawer>
+            <Hidden smUp>
+                <Drawer
+                    className={classes.drawer}
+                    variant="temporary"
+                    anchor="left"
+                    open={overlayOpen}
+                    classes={{
+                        paper: classes.drawerPaper,
+                    }}
+                >
+                    <Toolbar/>
+                    <Toolbar className={classes.drawerHeader}>
+                        <Typography
+                            variant="h5"
+                        >
+                            Søkefilter
+                        </Typography>
+                        <IconButton
+                            onClick={handleDrawerToggle}
+                            edge="end"
+                            className={classes.menuButton}
+                        >
+                            <Clear />
+                        </IconButton>
+                    </Toolbar>
+                    <Controls/>
+                </Drawer>
+            </Hidden>
+            <Hidden only="xs">
+                <Drawer
+                    className={classes.drawer}
+                    variant="persistent"
+                    anchor="left"
+                    open={open}
+                    classes={{
+                        paper: classes.drawerPaper,
+                    }}
+                >
+                    <Toolbar/>
+                    <Toolbar className={classes.drawerHeader}>
+                        <Typography
+                            variant="h5"
+                        >
+                            Søkefilter
+                        </Typography>
+                        <IconButton
+                            onClick={handleDrawerToggle}
+                            edge="end"
+                            className={classes.menuButton}
+                        >
+                            <Clear />
+                        </IconButton>
+                    </Toolbar>
+                    <Controls/>
+                </Drawer>
+            </Hidden>
             <main
                 className={clsx(classes.content, {
                     [classes.contentShift]: open,

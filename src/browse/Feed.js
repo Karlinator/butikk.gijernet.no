@@ -1,9 +1,10 @@
 import React from "react";
-import {GridList, GridListTile, GridListTileBar, IconButton} from "@material-ui/core";
+import {GridList, GridListTile, GridListTileBar, IconButton, useMediaQuery, useTheme} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {AddShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import { useHistory } from 'react-router-dom';
+
 
 const useStyles = makeStyles((theme) => ({
     gridList: {
@@ -32,6 +33,35 @@ const Feed = (props) => {
     const classes = useStyles();
     const history = useHistory();
 
+    const theme = useTheme();
+    const size = {
+        xl: useMediaQuery(theme.breakpoints.up('xl')),
+        lg: useMediaQuery(theme.breakpoints.up('lg')),
+        md: useMediaQuery(theme.breakpoints.up('md')),
+        sm: useMediaQuery(theme.breakpoints.up('sm')),
+    }
+
+    const getGridListCols = () => {
+        if (size.xl) {
+            return 5;
+        }
+
+        if (size.lg) {
+            return 4;
+        }
+
+        if (size.md) {
+            return 3;
+        }
+
+        if (size.sm) {
+            return 2;
+        }
+
+        return 1;
+    }
+
+
     const handleGotoProduct = (e, id) => {
         history.push('/'+id);
     }
@@ -42,8 +72,7 @@ const Feed = (props) => {
     }
 
     return (
-        // TODO: Make this scale columns by screen size.
-        <GridList cols={4} spacing={16} className={classes.gridList}>
+        <GridList cols={getGridListCols()} spacing={16} className={classes.gridList}>
             {props.products.map((tile) => (
                 <GridListTile>
                     <Link to={'/'+tile.id}>

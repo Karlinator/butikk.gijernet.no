@@ -7,7 +7,7 @@ import {
     IconButton,
     Toolbar,
     GridListTileBar,
-    Typography, Grid, Paper, TextField, Button
+    Typography, Grid, Paper, TextField, Button, useMediaQuery, useTheme
 } from "@material-ui/core";
 import {AddShoppingCart, ArrowBack} from "@material-ui/icons";
 import {makeStyles} from "@material-ui/core/styles";
@@ -125,12 +125,37 @@ const ProductPage = () => {
 
 const Product = (props) => {
     const classes = useStyles();
+
+    const theme = useTheme();
+    const size = {
+        xl: useMediaQuery(theme.breakpoints.up('xl')),
+        lg: useMediaQuery(theme.breakpoints.up('lg')),
+        md: useMediaQuery(theme.breakpoints.up('md')),
+        sm: useMediaQuery(theme.breakpoints.up('sm')),
+    }
+
+    const getGridListCols = () => {
+        if (size.xl) {
+            return 5;
+        }
+        if (size.lg) {
+            return 4;
+        }
+        if (size.md) {
+            return 3;
+        }
+        if (size.sm) {
+            return 2;
+        }
+        return 1;
+    }
+
     return (
         <Container className={classes.root}>
             <Container>
                 <img className={classes.coverImg} alt={props.product.title} src={props.product.image} />
             </Container>
-            <GridList className={classes.gridList} cols={3.5}>
+            <GridList className={classes.gridList} cols={getGridListCols}>
                 {props.product.variants.map((tile) => (
                     <GridListTile cols={0.5} rows={0.8}  key={tile.id}>
                         <img className={classes.img} alt="" src={tile.img} />
@@ -149,12 +174,12 @@ const Product = (props) => {
                 <Typography variant="h4" component="h2">kr{props.product.price}</Typography>
             </Container>
             <Grid container spacing={3}>
-                <Grid item xs={9}>
+                <Grid item xs={12} md={9}>
                     <Typography variant="body1">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent at viverra mi, ac dapibus lorem. Sed viverra tempor nulla vel maximus. Vestibulum quis commodo neque. Quisque quis nisi pellentesque sapien maximus sodales dignissim id justo. Vestibulum sed imperdiet ex, eu convallis elit. Cras vitae libero cursus, tincidunt ipsum eu, eleifend nulla. Nullam eu ligula id ipsum tristique porta sit amet ac eros. Phasellus vestibulum lectus in porta eleifend. Cras eget volutpat tellus. Morbi facilisis risus ac odio eleifend consequat.
                     </Typography>
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item xs={12} md={3}>
                     <Controls />
                 </Grid>
             </Grid>
