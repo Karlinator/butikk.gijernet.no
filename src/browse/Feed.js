@@ -68,7 +68,17 @@ const Feed = (props) => {
 
     const handleAddToCart = (e, id) => {
         e.stopPropagation();
-        console.log(id);
+        props.onAddProduct();
+        let cart = JSON.parse(window.localStorage.getItem('cart'));
+        const i = cart.findIndex(p => p.id === id);
+        if (i !== -1) {
+            cart[i].num = parseInt(cart[i].num) + 1;
+        } else {
+            cart.push({id: id, num: 1});
+        }
+        const cartJSON = JSON.stringify(cart);
+        console.log(cartJSON)
+        window.localStorage.setItem('cart', cartJSON);
     }
 
     return (

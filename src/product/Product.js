@@ -7,7 +7,7 @@ import {
     IconButton,
     Toolbar,
     GridListTileBar,
-    Typography, Grid, Paper, TextField, Button, useMediaQuery, useTheme, Hidden
+    Typography, Grid, Paper, TextField, Button, Hidden, Badge
 } from "@material-ui/core";
 import {AddShoppingCart, ArrowBack, ShoppingCart} from "@material-ui/icons";
 import {makeStyles} from "@material-ui/core/styles";
@@ -112,6 +112,16 @@ const product = {
 
 const ProductPage = () => {
     const classes = useStyles();
+    const [totalProductNum, setTotalProductNum] = useState(() => {
+        const cart = JSON.parse(window.localStorage.getItem('cart'));
+        return cart.reduce((total, item) => total + parseInt(item.num), 0);
+    });
+    const handleProductNumChange = () => {
+        setTotalProductNum(() => {
+                const cart = JSON.parse(window.localStorage.getItem('cart'));
+                return cart.reduce((total, item) => total + parseInt(item.num), 0);
+            });
+    }
     let {id} = useParams();
     return(
         <div className={classes.bottom}>
@@ -131,13 +141,15 @@ const ProductPage = () => {
                             aria-label="handlevogn"
                             edge="end"
                         >
-                            <ShoppingCart />
+                            <Badge color="secondary" badgeContent={totalProductNum}>
+                                <ShoppingCart />
+                            </Badge>
                         </IconButton>
                     </Link>
                 </Toolbar>
             </AppBar>
             {id}
-            <Product product={product} />
+            <Product onChange={handleProductNumChange} product={product} />
         </div>
     )
 }
@@ -147,28 +159,8 @@ const Product = (props) => {
 
     const [selected, setSelected] = useState(props.product.variants[0].id);
 
-    const theme = useTheme();
-    const size = {
-        xl: useMediaQuery(theme.breakpoints.up('xl')),
-        lg: useMediaQuery(theme.breakpoints.up('lg')),
-        md: useMediaQuery(theme.breakpoints.up('md')),
-        sm: useMediaQuery(theme.breakpoints.up('sm')),
-    }
-
-    const getGridListCols = () => {
-        if (size.xl) {
-            return 5;
-        }
-        if (size.lg) {
-            return 4;
-        }
-        if (size.md) {
-            return 3;
-        }
-        if (size.sm) {
-            return 2;
-        }
-        return 1;
+    const handleSelectVariant = (e, id) => {
+        setSelected(id);
     }
 
     return (
@@ -178,7 +170,12 @@ const Product = (props) => {
             </Container>
             <GridList className={classes.gridList}>
                 {props.product.variants.map((tile) => (
-                    <GridListTile cols={0.5} rows={0.8}  key={tile.id}>
+                    <GridListTile
+                        cols={0.5}
+                        rows={0.8}
+                        key={tile.id}
+                        onClick={e => handleSelectVariant(e, tile.id)}
+                    >
                         <img className={classes.img} alt="" src={tile.img} />
                         <GridListTileBar
                             title={tile.title}
@@ -207,7 +204,7 @@ const Product = (props) => {
                 </Grid>
                 <Hidden smDown>
                     <Grid item md={4}>
-                        <Controls id={selected} />
+                        <Controls onChange={props.onChange} id={selected} />
                     </Grid>
                 </Hidden>
             </Grid>
@@ -235,6 +232,7 @@ const Controls = (props) => {
         const cartJSON = JSON.stringify(cart);
         console.log(cartJSON)
         window.localStorage.setItem('cart', cartJSON);
+        props.onChange();
     }
 
     return (

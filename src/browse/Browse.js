@@ -14,7 +14,7 @@ import {
     useTheme,
     CircularProgress,
     Container,
-    Fade
+    Fade, Badge
 } from "@material-ui/core";
 import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
@@ -90,6 +90,17 @@ const Browse = () => {
     const [loading, setLoading] = useState(true);
     const [overlayOpen, setOverlayOpen] = useState(false);
 
+    const [totalProductNum, setTotalProductNum] = useState(() => {
+        const cart = JSON.parse(window.localStorage.getItem('cart'));
+        return cart.reduce((total, item) => total + parseInt(item.num), 0);
+    });
+    const handleProductNumChange = () => {
+        setTotalProductNum(() => {
+            const cart = JSON.parse(window.localStorage.getItem('cart'));
+            return cart.reduce((total, item) => total + parseInt(item.num), 0);
+        });
+    }
+
     const [feed, setFeed] = useState(
         <Container className={classes.headline}>
             <Fade
@@ -111,7 +122,7 @@ const Browse = () => {
                 result => {
                     console.log(result);
                     setLoading(false);
-                    setFeed(<Feed products={result.products}/>);
+                    setFeed(<Feed onAddProduct={handleProductNumChange} products={result.products}/>);
                 },
                 (error) => {
                     setLoading(false);
@@ -160,7 +171,9 @@ const Browse = () => {
                             aria-label="handlevogn"
                             edge="end"
                         >
-                            <ShoppingCart />
+                            <Badge color="secondary" badgeContent={totalProductNum}>
+                                <ShoppingCart />
+                            </Badge>
                         </IconButton>
                     </Link>
                 </Toolbar>
