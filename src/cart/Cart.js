@@ -60,7 +60,7 @@ const Cart = () => {
                 <TableBody>
                     {products.map((row) => (
                         <TableRow>
-                            <TableCell align="center"><img className={classes.img} src={row.image}/></TableCell>
+                            <TableCell align="center"><img alt="" className={classes.img} src={row.image}/></TableCell>
                             <TableCell align="center">{row.name}</TableCell>
                             <TableCell align="center">{row.variant}</TableCell>
                             <TableCell align="center">{row.quantity}</TableCell>
