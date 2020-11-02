@@ -1,7 +1,11 @@
 const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+admin.initializeApp(functions.config().firebase);
 const stripe = require('stripe')(functions.config().stripe.key, {
     apiVersion: '2020-08-27',
 });
+
+let db;
 
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -54,10 +58,34 @@ exports.products = functions.https.onRequest((request, response) => {
             {id: 'prod_IJTl8E19L7DQsA', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
         ]}));
 })
+
+exports.productDetails = functions.https.onRequest(async (request, response) => {
+    db = admin.firestore();
+
+    const product = await stripe.products.retrieve(request.query.id.toString())
+    const productDesc = await db.collection('products').doc(product.id).get()
+    const prices = await stripe.prices.list({product: request.query.id.toString()})
+
+    const description = productDesc.data().description
+
+    response.send({
+        id: product.id,
+        description: description,
+        name: product.name,
+        images: product.images,
+        unit_label: product.unit_label,
+        price: {
+            id: prices.data[0].id,
+            amount: prices.data[0].unit_amount,
+        }
+    });
+
+})
+
 /**
  * Provides details (name, price, etc) on a list of SKUs.
  */
-exports.productDetails = functions.https.onRequest((request, response) => {
+exports.cartDetails = functions.https.onRequest((request, response) => {
     const productList = request.body.productList;
 
     getStripeProductsWithPrices(productList).then(values => {

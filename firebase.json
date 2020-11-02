@@ -19,6 +19,10 @@
         "function": "productDetails"
       },
       {
+        "source": "/api/cartDetails",
+        "function": "cartDetails"
+      },
+      {
         "source": "/api/checkout",
         "function": "checkout"
       },
@@ -40,6 +44,9 @@
     },
     "hosting": {
       "port": 5000
+    },
+    "firestore": {
+      "port": 8080
     },
     "ui": {
       "enabled": true,

@@ -109,7 +109,7 @@ const Cart = () => {
     useEffect(() => {
         const cartList = JSON.parse(window.localStorage.getItem('cart'));
         const productList = cartList.map(item => item.id);
-        fetch('/api/productDetails', {
+        fetch('/api/cartDetails', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     AppBar,
     Container,
@@ -6,8 +6,7 @@ import {
     GridListTile,
     IconButton,
     Toolbar,
-    GridListTileBar,
-    Typography, Grid, Paper, TextField, Button, Hidden, Badge
+    Typography, Grid, Paper, TextField, Button, Hidden, Badge, Fade, CircularProgress
 } from "@material-ui/core";
 import {AddShoppingCart, ArrowBack, ShoppingCart} from "@material-ui/icons";
 import {makeStyles} from "@material-ui/core/styles";
@@ -41,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
     img: {
         height: '100%',
         width: 'auto',
+        cursor: 'pointer'
     },
     coverImg: {
         width: '100%',
@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const product = {
+/*const product = {
     id: "prod_IJSWK9F74S0OPe",
     title: "Test",
     image: "/logo512.png",
@@ -109,7 +109,7 @@ const product = {
             img: "/logo512.png"
         },
     ]
-}
+}*/
 
 const ProductPage = () => {
     const classes = useStyles();
@@ -117,6 +117,8 @@ const ProductPage = () => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
         return cart.reduce((total, item) => total + parseInt(item.num), 0);
     });
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
     const handleProductNumChange = () => {
         setTotalProductNum(() => {
                 const cart = JSON.parse(window.localStorage.getItem('cart'));
@@ -124,6 +126,39 @@ const ProductPage = () => {
             });
     }
     let {id} = useParams();
+
+
+    useEffect(() => {
+        fetch('/api/productDetails?id='+id)
+            .then(res => res.json())
+            .then(res => {
+                setLoading(false)
+                setProduct(res);
+            })
+    // eslint-disable-next-line
+    }, [])
+
+    const content = (() => {
+        if (loading || product === null) {
+            return (
+                <Container className={classes.headline}>
+                    <Fade
+                        in={loading}
+                        className={classes.center}
+                        style={{
+                            transitionDelay: loading ? '800ms' : '0ms',
+                        }}
+                        unmountOnExit
+                    >
+                        <CircularProgress />
+                    </Fade>
+                </Container>
+            )
+        } else {
+            return <Product onChange={handleProductNumChange} product={product} />
+        }
+    })();
+
     return(
         <div className={classes.bottom}>
             <AppBar position="sticky">
@@ -149,8 +184,7 @@ const ProductPage = () => {
                     </Link>
                 </Toolbar>
             </AppBar>
-            {id}
-            <Product onChange={handleProductNumChange} product={product} />
+            {content}
         </div>
     )
 }
@@ -158,39 +192,32 @@ const ProductPage = () => {
 const Product = (props) => {
     const classes = useStyles();
 
-    const [selected, setSelected] = useState(props.product.variants[0].id);
+    const [selected, setSelected] = useState(props.product.images[0]);
 
-    const handleSelectVariant = (e, id) => {
-        setSelected(id);
+    const handleSelectVariant = (e, img) => {
+        setSelected(img);
     }
 
     return (
         <Container className={classes.root}>
             <Container>
-                <img className={classes.coverImg} alt={props.product.title} src={props.product.image} />
+                <img className={classes.coverImg} alt={props.product.title} src={selected} />
             </Container>
             <GridList className={classes.gridList}>
-                {props.product.variants.map((tile) => (
+                {props.product.images.map((img) => (
                     <GridListTile
-                        cols={0.5}
+                        cols={2}
                         rows={0.8}
-                        key={tile.id}
-                        onClick={e => handleSelectVariant(e, tile.id)}
+                        key={img}
+                        onClick={e => handleSelectVariant(e, img)}
                     >
-                        <img className={classes.img} alt="" src={tile.img} />
-                        <GridListTileBar
-                            title={tile.title}
-                            classes={{
-                                root: classes.titleBar,
-                                title: classes.title,
-                            }}
-                        />
+                        <img className={classes.img} alt="" src={img} />
                     </GridListTile>
                 ))}
             </GridList>
             <Container>
-                <Typography variant="h3" component="h1">{props.product.title}</Typography>
-                <Typography variant="h4" component="h2">kr{props.product.price}</Typography>
+                <Typography variant="h3" component="h1">{props.product.name}</Typography>
+                <Typography variant="h4" component="h2">kr {props.product.price.amount/100}</Typography>
             </Container>
             <Grid container spacing={3}>
                 <Hidden mdUp>
@@ -200,7 +227,7 @@ const Product = (props) => {
                 </Hidden>
                 <Grid item xs={12} md={8}>
                     <Typography variant="body1">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent at viverra mi, ac dapibus lorem. Sed viverra tempor nulla vel maximus. Vestibulum quis commodo neque. Quisque quis nisi pellentesque sapien maximus sodales dignissim id justo. Vestibulum sed imperdiet ex, eu convallis elit. Cras vitae libero cursus, tincidunt ipsum eu, eleifend nulla. Nullam eu ligula id ipsum tristique porta sit amet ac eros. Phasellus vestibulum lectus in porta eleifend. Cras eget volutpat tellus. Morbi facilisis risus ac odio eleifend consequat.
+                        {props.product.description}
                     </Typography>
                 </Grid>
                 <Hidden smDown>
