@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import {ArrowBack} from "@material-ui/icons";
 import {Link} from "react-router-dom";
+import { loadStripe } from '@stripe/stripe-js';
 
 const useStyles = makeStyles({
     table: {
@@ -81,7 +82,27 @@ const Cart = () => {
 
     const handleCartNumChange = (e, id) => {
         if (e.target.value >= 0 && e.target.value !== '') {
-            setProducts(products.map(v => ({...v, quantity: v.id !== id ? v.quantity : e.target.value})));
+            const p = products.map(v => ({...v, quantity: v.id !== id ? v.quantity : e.target.value}));
+            setProducts(p);
+            window.localStorage.setItem('cart', JSON.stringify(p.map(v => ({id: v.id, num: v.quantity}))))
+        }
+    }
+
+    const handleCheckout = async () => {
+        console.log(products.map(v => ({price: v.price.id, quantity: v.quantity})))
+        const stripe = await loadStripe(process.env.REACT_APP_STRIPE_KEY)
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            body: JSON.stringify(products.map(v => ({price: v.price.id, quantity: parseInt(v.quantity)})))
+        });
+        const session = await response.json();
+
+        const result = await stripe.redirectToCheckout({
+            sessionId: session.id,
+        })
+
+        if (result.error) {
+            window.alert(result.error.message);
         }
     }
 
@@ -137,7 +158,7 @@ const Cart = () => {
             </AppBar>
             <Container>
                 {cart}
-                <Button className={classes.order} variant="contained" color="primary">Kjøp</Button>
+                <Button onClick={handleCheckout} className={classes.order} variant="contained" color="primary">Kjøp</Button>
             </Container>
         </div>
     )
@@ -182,7 +203,7 @@ const CartList = (props) => {
                     </TableRow>
                     <TableRow>
                         <TableCell align="center">Total:</TableCell>
-                        <TableCell align="center">{props.products.reduce((sum, p) => sum + p.quantity*p.price.amount, 0)}</TableCell>
+                        <TableCell align="center">{props.products.reduce((sum, p) => sum + p.quantity*p.price.amount, 0) + props.shipping}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>

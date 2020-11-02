@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
-const Stripe = require('stripe');
-const stripe = Stripe(functions.config().stripe.key)
+const stripe = require('stripe')(functions.config().stripe.key, {
+    apiVersion: '2020-08-27',
+});
 
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -76,4 +77,18 @@ exports.productDetails = functions.https.onRequest((request, response) => {
 
 
 
+})
+
+exports.checkout = functions.https.onRequest((request, response) => {
+    console.log(request.body)
+    stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: JSON.parse(request.body),
+        mode: "payment",
+        success_url: "https://store.gijernet.no/takk",
+        cancel_url: "https://store.gijernet.no/avbrutt"
+
+    })
+        .then(result => response.send({id: result.id}))
+        .catch(error => response.send(error));
 })

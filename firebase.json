@@ -19,6 +19,10 @@
         "function": "productDetails"
       },
       {
+        "source": "/api/checkout",
+        "function": "checkout"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
