@@ -60,12 +60,15 @@ exports.productDetails = functions.https.onRequest((request, response) => {
     const productList = request.body.productList;
 
     getStripeProductsWithPrices(productList).then(values => {
-            return response.send(values.map(v => ({
+            return response.send({products: values.map(v => ({
                 id: v.id,
                 name: v.name,
                 image: v.images[0],
-                price: v.price.unit_amount
-            })));
+                price: {
+                    amount: v.price.unit_amount,
+                    id: v.price.id,
+                }
+            })), shipping: 550});
     })
         .catch((error) =>
             response.send(error)
