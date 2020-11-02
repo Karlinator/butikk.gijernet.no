@@ -41,16 +41,16 @@ exports.products = functions.https.onRequest((request, response) => {
 
     response.send(JSON.stringify({
         products: [
-            {id: 'dashjkas', title: 'test', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'gfsd', title: 'test2', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'hdfsg', title: 'test3', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'sdf', title: 'test4', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'dsghgdf', title: 'test5', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'gdsazfg', title: 'test6', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'hser', title: 'test7', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: '245654', title: 'test8', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'dfzbhg', title: 'test9', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'sd<fsd', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJSWK9F74S0OPe', title: 'test', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJ7hLdu2Mrs5Qq', title: 'test2', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test3', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test4', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test5', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test6', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test7', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test8', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test9', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'sd<prod_IJTl8E19L7DQsA', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
         ]}));
 })
 /**
