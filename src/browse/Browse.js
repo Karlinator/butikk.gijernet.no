@@ -95,10 +95,7 @@ const Browse = () => {
         return cart.reduce((total, item) => total + parseInt(item.num), 0);
     });
     const handleProductNumChange = () => {
-        setTotalProductNum(() => {
-            const cart = JSON.parse(window.localStorage.getItem('cart'));
-            return cart.reduce((total, item) => total + parseInt(item.num), 0);
-        });
+        setTotalProductNum(totalProductNum + 1);
     }
 
     const [feed, setFeed] = useState(
@@ -129,6 +126,7 @@ const Browse = () => {
                     setFeed(error);
                 }
             )
+    // eslint-disable-next-line
     }, []);
 
 
