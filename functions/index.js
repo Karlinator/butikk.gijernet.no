@@ -50,7 +50,7 @@ exports.products = functions.https.onRequest((request, response) => {
             {id: 'prod_IJTl8E19L7DQsA', title: 'test7', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
             {id: 'prod_IJTl8E19L7DQsA', title: 'test8', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
             {id: 'prod_IJTl8E19L7DQsA', title: 'test9', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-            {id: 'sd<prod_IJTl8E19L7DQsA', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
+            {id: 'prod_IJTl8E19L7DQsA', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
         ]}));
 })
 /**

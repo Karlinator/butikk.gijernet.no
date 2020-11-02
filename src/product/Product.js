@@ -63,6 +63,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const product = {
+    id: "prod_IJSWK9F74S0OPe",
     title: "Test",
     image: "/logo512.png",
     price: 420,
@@ -194,7 +195,7 @@ const Product = (props) => {
             <Grid container spacing={3}>
                 <Hidden mdUp>
                     <Grid item xs={12}>
-                        <Controls id={selected} />
+                        <Controls onChange={props.onChange} id={props.product.id} />
                     </Grid>
                 </Hidden>
                 <Grid item xs={12} md={8}>
@@ -204,7 +205,7 @@ const Product = (props) => {
                 </Grid>
                 <Hidden smDown>
                     <Grid item md={4}>
-                        <Controls onChange={props.onChange} id={selected} />
+                        <Controls selected={selected} onChange={props.onChange} id={props.product.id} />
                     </Grid>
                 </Hidden>
             </Grid>
