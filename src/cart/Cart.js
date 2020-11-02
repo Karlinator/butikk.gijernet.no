@@ -35,36 +35,36 @@ const useStyles = makeStyles({
     },
 });
 
-const products = [
-    {
-        name: "Test",
-        variant: "vanlig",
-        image: "/logo512.png",
-        quantity: 5,
-        price: 200
-    },
-    {
-        name: "Test2",
-        variant: "vanlig",
-        image: "/logo512.png",
-        quantity: 5,
-        price: 152
-    },
-    {
-        name: "Test3",
-        variant: "ekstraordinær",
-        image: "/logo512.png",
-        quantity: 7,
-        price: 200
-    },
-    {
-        name: "Test4",
-        variant: "vanlig",
-        image: "/logo512.png",
-        quantity: 69,
-        price: 420
-    },
-]
+// const products = [
+//     {
+//         name: "Test",
+//         variant: "vanlig",
+//         image: "/logo512.png",
+//         quantity: 5,
+//         price: 200
+//     },
+//     {
+//         name: "Test2",
+//         variant: "vanlig",
+//         image: "/logo512.png",
+//         quantity: 5,
+//         price: 152
+//     },
+//     {
+//         name: "Test3",
+//         variant: "ekstraordinær",
+//         image: "/logo512.png",
+//         quantity: 7,
+//         price: 200
+//     },
+//     {
+//         name: "Test4",
+//         variant: "vanlig",
+//         image: "/logo512.png",
+//         quantity: 69,
+//         price: 420
+//     },
+// ]
 
 
 const Cart = () => {
@@ -89,18 +89,19 @@ const Cart = () => {
 
     useEffect(() => {
         const cartList = JSON.parse(window.localStorage.getItem('cart'));
-        const skuList = cartList.map(item => item.id);
+        const productList = cartList.map(item => item.id);
         fetch('/api/productDetails', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(skuList)
+            body: JSON.stringify({productList: productList})
         })
             .then(result => result.json())
             .then(result => {
                 setLoading(false);
-                setCart(<CartList products={result.products}/>);
+                const products = result.map(v => ({...v, price: v.price/100, quantity: cartList.find(c => c.id === v.id).num}))
+                setCart(<CartList products={products}/>);
             })
     }, [])
 

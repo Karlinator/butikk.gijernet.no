@@ -1,4 +1,6 @@
 const functions = require('firebase-functions');
+const Stripe = require('stripe');
+const stripe = Stripe(functions.config().stripe.key)
 
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -8,7 +10,35 @@ const functions = require('firebase-functions');
 //   response.send("Hello from Firebase!");
 // });
 
+const getStripeProductsWithPrices = (productList) => {
+    let productListDetailed = [];
+
+    productList.forEach(product => {
+            productListDetailed.push(stripe.products.retrieve(product));
+        }
+    )
+
+    let responseList = {};
+
+    return Promise.all(productListDetailed).then((values) => {
+        responseList.products = values;
+        const pricesCalls = values.map(v => stripe.prices.list({product: v.id}))
+        return Promise.all(pricesCalls);
+    })
+        .then((values) => {
+            responseList.prices = values.map(v => v.data[0]);
+            responseList.prices.forEach(price => {
+                responseList.products[responseList.products.findIndex(product => product.id === price.product)].price = price;
+            })
+            return responseList.products;
+        })
+        .catch(
+
+        )
+}
+
 exports.products = functions.https.onRequest((request, response) => {
+
     response.send(JSON.stringify({
         products: [
             {id: 'dashjkas', title: 'test', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
@@ -23,36 +53,23 @@ exports.products = functions.https.onRequest((request, response) => {
             {id: 'sd<fsd', title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
         ]}));
 })
-
+/**
+ * Provides details (name, price, etc) on a list of SKUs.
+ */
 exports.productDetails = functions.https.onRequest((request, response) => {
-    response.send(JSON.stringify({products: [
-        {
-            name: "Test",
-            variant: "vanlig",
-            image: "/logo512.png",
-            quantity: 5,
-            price: 200
-        },
-        {
-            name: "Test2",
-            variant: "vanlig",
-            image: "/logo512.png",
-            quantity: 5,
-            price: 152
-        },
-        {
-            name: "Test3",
-            variant: "ekstraordinær",
-            image: "/logo512.png",
-            quantity: 7,
-            price: 200
-        },
-        {
-            name: "Test4",
-            variant: "vanlig",
-            image: "/logo512.png",
-            quantity: 69,
-            price: 420
-        },
-    ]}));
+    const productList = request.body.productList;
+
+    getStripeProductsWithPrices(productList).then(values => {
+            return response.send(values.map(v => ({
+                id: v.id,
+                name: v.name,
+                image: v.images[0],
+                price: v.price.unit_amount
+            })));
+    })
+        .catch(
+        )
+
+
+
 })
