@@ -15,6 +15,10 @@
         "function": "products"
       },
       {
+        "source": "/api/productDetails",
+        "function": "productDetails"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

@@ -67,7 +67,8 @@ exports.productDetails = functions.https.onRequest((request, response) => {
                 price: v.price.unit_amount
             })));
     })
-        .catch(
+        .catch((error) =>
+            response.send(error)
         )
 
 
