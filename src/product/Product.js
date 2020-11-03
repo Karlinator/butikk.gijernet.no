@@ -59,6 +59,10 @@ const useStyles = makeStyles((theme) => ({
     },
     bottom: {
         marginBottom: 300,
+    },
+    center: {
+        marginLeft: '45%',
+        marginTop: 50,
     }
 }));
 
