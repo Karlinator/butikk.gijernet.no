@@ -9,7 +9,7 @@ import Cart from "./cart/Cart";
 import Browse from "./browse/Browse";
 
 function App() {
-    if (!window.localStorage.getItem('cart')) {
+    if (!window.localStorage.getItem('cart') || JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('prod'))) {
         window.localStorage.setItem('cart', '[]')
     }
     return (
