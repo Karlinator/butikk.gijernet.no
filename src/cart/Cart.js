@@ -82,9 +82,9 @@ const Cart = () => {
 
     const handleCartNumChange = (e, id) => {
         if (e.target.value >= 0 && e.target.value !== '') {
-            const p = products.map(v => ({...v, quantity: v.id !== id ? v.quantity : e.target.value}));
+            const p = products.map(v => ({...v, quantity: v.price.id !== id ? v.quantity : e.target.value}));
             setProducts(p);
-            window.localStorage.setItem('cart', JSON.stringify(p.map(v => ({id: v.id, num: v.quantity}))))
+            window.localStorage.setItem('cart', JSON.stringify(p.map(v => ({id: v.price.id, num: v.quantity}))))
         }
     }
 
@@ -191,7 +191,7 @@ const CartList = (props) => {
                                     type="number"
                                     size="small"
                                     value={row.quantity}
-                                    onChange={e => props.onChange(e, row.id)}
+                                    onChange={e => props.onChange(e, row.price.id)}
                                 />
                             </TableCell>
                             <TableCell align="center">{row.price.amount}</TableCell>

@@ -1,7 +1,7 @@
-import React from "react";
+import React, {useState} from "react";
 import {GridList, GridListTile, GridListTileBar, IconButton, useMediaQuery, useTheme} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {AddShoppingCart} from "@material-ui/icons";
+import {AddShoppingCart, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import { useHistory } from 'react-router-dom';
 
@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 const Feed = (props) => {
     const classes = useStyles();
     const history = useHistory();
+    const [cartList, setCartList] = useState(JSON.parse(window.localStorage.getItem('cart')));
 
     const theme = useTheme();
     const size = {
@@ -76,10 +77,12 @@ const Feed = (props) => {
         } else {
             cart.push({id: id, num: 1});
         }
+        setCartList(cart);
         const cartJSON = JSON.stringify(cart);
         console.log(cartJSON)
         window.localStorage.setItem('cart', cartJSON);
     }
+
 
     return (
         <GridList cols={getGridListCols()} spacing={16} className={classes.gridList}>
@@ -90,8 +93,8 @@ const Feed = (props) => {
                     </Link>
                         <GridListTileBar
                             id={tile.id}
-                            title={tile.title}
-                            subtitle={tile.subtitle}
+                            title={tile.title+(tile.subtitle !== null ? ' – '+tile.subtitle : '')}
+                            subtitle={cartList.find(v => tile.price.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.price.amount/100}
                             className={classes.clickable}
                             onClick={e => handleGotoProduct(e, tile.id)}
                             actionIcon={
