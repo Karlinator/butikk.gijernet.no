@@ -15,43 +15,23 @@ let db;
 //   response.send("Hello from Firebase!");
 // });
 
-const getStripeProductsWithPrices = (productList) => {
-    let productListDetailed = [];
-
-    productList.forEach(product => {
-            productListDetailed.push(stripe.products.retrieve(product));
-        }
-    )
-
-    let responseList = {};
-
-    return Promise.all(productListDetailed).then((values) => {
-        responseList.products = values;
-        const pricesCalls = values.map(v => stripe.prices.list({product: v.id}))
-        return Promise.all(pricesCalls);
-    })
-        .then((values) => {
-            responseList.prices = values.map(v => v.data[0]);
-            responseList.prices.forEach(price => {
-                responseList.products[responseList.products.findIndex(product => product.id === price.product)].price = price;
-            })
-            return responseList.products;
-        })
-        .catch(
-
-        )
-}
 
 exports.products = functions.https.onRequest(async (request, response) => {
 
-    const products = await stripe.products.list();
+    const prices = await stripe.prices.list({active: true, expand: ['data.product']});
+
+    //prices.forEach(v => console.log(v.data[0]));
 
     response.send({
-        products: products.data.map(v => ({
-            id: v.id,
-            title: v.name,
-            subtitle: v.description,
-            img: v.images[0]
+        products: prices.data.filter(v => v.product.active === true).map(v => ({
+            id: v.product.id,
+            title: v.product.name,
+            subtitle: v.product.description,
+            img: v.product.images[0],
+            price: {
+                id: v.id,
+                amount: v.unit_amount
+            }
         }))
     })
 })
@@ -63,7 +43,13 @@ exports.productDetails = functions.https.onRequest(async (request, response) => 
     const productDesc = await db.collection('products').doc(product.id).get()
     const prices = await stripe.prices.list({product: request.query.id.toString()})
 
-    const description = productDesc.data().description
+    let description;
+    try {
+        description = productDesc.data().description
+    } catch {
+        description = '';
+    }
+
 
     response.send({
         id: product.id,
@@ -80,28 +66,27 @@ exports.productDetails = functions.https.onRequest(async (request, response) => 
 })
 
 /**
- * Provides details (name, price, etc) on a list of SKUs.
+ * Provides details (name, price, etc) on a list of prices.
  */
-exports.cartDetails = functions.https.onRequest((request, response) => {
-    const productList = request.body.productList;
+exports.cartDetails = functions.https.onRequest(async (request, response) => {
+    const priceList = request.body.priceList;
+    console.log(priceList)
 
-    getStripeProductsWithPrices(productList).then(values => {
-            return response.send({products: values.map(v => ({
+    const products = await Promise.all(priceList.map(v => stripe.prices.retrieve(v, {expand: ['product']})));
+
+    console.log(products)
+
+    const r = {products: products.map(v => ({
+            id: v.product.id,
+            name: v.product.name,
+            image: v.product.images[0],
+            price: {
+                amount: v.unit_amount,
                 id: v.id,
-                name: v.name,
-                image: v.images[0],
-                price: {
-                    amount: v.price.unit_amount,
-                    id: v.price.id,
-                }
-            })), shipping: 550});
-    })
-        .catch((error) =>
-            response.send(error)
-        )
+            }
+        })), shipping: 550};
 
-
-
+    response.send(r)
 })
 
 exports.checkout = functions.https.onRequest((request, response) => {

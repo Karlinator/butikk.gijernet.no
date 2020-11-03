@@ -222,7 +222,7 @@ const Product = (props) => {
             <Grid container spacing={3}>
                 <Hidden mdUp>
                     <Grid item xs={12}>
-                        <Controls onChange={props.onChange} id={props.product.id} />
+                        <Controls onChange={props.onChange} id={props.product.price.id} />
                     </Grid>
                 </Hidden>
                 <Grid item xs={12} md={8}>

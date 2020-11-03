@@ -108,18 +108,20 @@ const Cart = () => {
 
     useEffect(() => {
         const cartList = JSON.parse(window.localStorage.getItem('cart'));
-        const productList = cartList.map(item => item.id);
+        const priceList = cartList.map(item => item.id);
         fetch('/api/cartDetails', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({productList: productList})
+            body: JSON.stringify({priceList: priceList})
         })
             .then(result => result.json())
             .then(result => {
                 setLoading(false);
-                setProducts(result.products.map(v => ({...v, price: {...v.price, amount: v.price.amount/100}, quantity: cartList.find(c => c.id === v.id).num})));
+                console.log(result)
+                setProducts(result.products.map(v =>
+                    ({...v, price: {...v.price, amount: v.price.amount/100}, quantity: cartList.find(c => c.id === v.price.id).num})));
                 setShipping(result.shipping);
         // eslint-disable-next-line
     })}, [])

@@ -97,7 +97,7 @@ const Feed = (props) => {
                             actionIcon={
                                 <IconButton
                                     className={classes.icon}
-                                    onClick={e => handleAddToCart(e, tile.id)}
+                                    onClick={e => handleAddToCart(e, tile.price.id)}
                                 >
                                     <AddShoppingCart />
                                 </IconButton>
