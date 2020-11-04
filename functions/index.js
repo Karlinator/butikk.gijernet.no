@@ -99,6 +99,6 @@ exports.checkout = functions.https.onRequest((request, response) => {
         cancel_url: "https://store.gijernet.no/avbrutt"
 
     })
-        .then(result => response.send({id: result.id}))
+        .then(result => response.json({id: result.id}))
         .catch(error => response.send(error));
 })

@@ -11,13 +11,17 @@ import {
     AppBar,
     Toolbar,
     IconButton,
-    TextField, Button, Fade, CircularProgress,
+    TextField,
+    Button,
+    Fade,
+    CircularProgress,
+    Modal,
 } from "@material-ui/core";
-import {ArrowBack} from "@material-ui/icons";
+import {ArrowBack, RemoveShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import { loadStripe } from '@stripe/stripe-js';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
     table: {
         minWidth: 650,
     },
@@ -37,40 +41,31 @@ const useStyles = makeStyles({
     order: {
         float: 'right',
         marginTop: 20,
-    }
-});
+    },
+    paper: {
+        position: 'absolute',
+        width: 400,
+        backgroundColor: theme.palette.background.paper,
+        border: '2px solid #000',
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing(2, 4, 3),
+    },
+}));
 
-// const products = [
-//     {
-//         name: "Test",
-//         variant: "vanlig",
-//         image: "/logo512.png",
-//         quantity: 5,
-//         price: 200
-//     },
-//     {
-//         name: "Test2",
-//         variant: "vanlig",
-//         image: "/logo512.png",
-//         quantity: 5,
-//         price: 152
-//     },
-//     {
-//         name: "Test3",
-//         variant: "ekstraordinær",
-//         image: "/logo512.png",
-//         quantity: 7,
-//         price: 200
-//     },
-//     {
-//         name: "Test4",
-//         variant: "vanlig",
-//         image: "/logo512.png",
-//         quantity: 69,
-//         price: 420
-//     },
-// ]
+function rand() {
+    return Math.round(Math.random() * 20) - 10;
+}
 
+function getModalStyle() {
+    const top = 40 + rand();
+    const left = 40 + rand();
+
+    return {
+        top: `${top}%`,
+        left: `${left}%`,
+        transform: `translate(-${top}%, -${left}%)`,
+    };
+}
 
 const Cart = () => {
     const classes = useStyles();
@@ -78,6 +73,15 @@ const Cart = () => {
     const [loading, setLoading] = useState(true);
     const [products, setProducts] = useState(null);
     const [shipping, setShipping] = useState(0);
+
+    // Error modal
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalStyle] = useState(getModalStyle());
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalContent, setModalContent] = useState('');
+    const handleClose = () => {
+        setModalOpen(false);
+    }
 
 
     const handleCartNumChange = (e, id) => {
@@ -88,14 +92,29 @@ const Cart = () => {
         }
     }
 
+    const handleRemoveFromCart = (e, id) => {
+        const p = products.filter(v => v.price.id !== id)
+        setProducts(p);
+        window.localStorage.setItem('cart', JSON.stringify(p.map(v => ({id: v.price.id, num: v.quantity}))))
+    }
+
     const handleCheckout = async () => {
         console.log(products.map(v => ({price: v.price.id, quantity: v.quantity})))
         const stripe = await loadStripe(process.env.REACT_APP_STRIPE_KEY)
+        const request = products.map(v => ({price: v.price.id, quantity: parseInt(v.quantity)})).filter(v => v.quantity > 0)
+        if (request.length === 0) {
+            setModalTitle("Du kan ikke kjøpe ingenting!");
+            setModalContent("Eller, du kan det, men da får du ikke betale")
+            setModalOpen(true);
+            return;
+        }
+
         const response = await fetch('/api/checkout', {
             method: 'POST',
-            body: JSON.stringify(products.map(v => ({price: v.price.id, quantity: parseInt(v.quantity)})))
+            body: JSON.stringify(request)
         });
         const session = await response.json();
+
 
         const result = await stripe.redirectToCheckout({
             sessionId: session.id,
@@ -143,7 +162,7 @@ const Cart = () => {
                 </Container>
             )
         } else {
-            return <CartList onChange={handleCartNumChange} products={products} shipping={shipping}/>
+            return <CartList onRemove={handleRemoveFromCart} onChange={handleCartNumChange} products={products} shipping={shipping}/>
         }
     })();
 
@@ -162,6 +181,19 @@ const Cart = () => {
                 {cart}
                 <Button onClick={handleCheckout} className={classes.order} variant="contained" color="primary">Kjøp</Button>
             </Container>
+            <Modal
+                open={modalOpen}
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                <div style={modalStyle} className={classes.paper}>
+                    <h2 id="simple-modal-title">{modalTitle}</h2>
+                    <p id="simple-modal-description">
+                        {modalContent}
+                    </p>
+                </div>
+            </Modal>
         </div>
     )
 }
@@ -177,6 +209,7 @@ const CartList = (props) => {
                         <TableCell align="center">Antall</TableCell>
                         <TableCell align="center">Enhetspris</TableCell>
                         <TableCell align="center">Pris</TableCell>
+                        <TableCell align="center">Fjern</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -196,6 +229,11 @@ const CartList = (props) => {
                             </TableCell>
                             <TableCell align="center">{row.price.amount}</TableCell>
                             <TableCell align="center">{row.quantity*row.price.amount}</TableCell>
+                            <TableCell align="center">
+                                <RemoveShoppingCart
+                                    onClick={e => props.onRemove(e, row.price.id)}
+                                />
+                            </TableCell>
                         </TableRow>
                     ))}
                     <TableRow>
