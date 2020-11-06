@@ -221,6 +221,7 @@ const Product = (props) => {
             </GridList>
             <Container>
                 <Typography variant="h3" component="h1">{props.product.name}</Typography>
+                <Typography variant="h5" component="h3">{props.product.description}</Typography>
                 <Typography variant="h4" component="h2">kr {props.product.price.amount/100}</Typography>
             </Container>
             <Grid container spacing={3}>
@@ -231,7 +232,7 @@ const Product = (props) => {
                 </Hidden>
                 <Grid item xs={12} md={8}>
                     <Typography variant="body1">
-                        {props.product.description}
+                        {props.product.longDescription}
                     </Typography>
                 </Grid>
                 <Hidden smDown>

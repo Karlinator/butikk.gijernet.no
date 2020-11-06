@@ -7,9 +7,10 @@ import {
 import ProductPage from "./product/Product";
 import Cart from "./cart/Cart";
 import Browse from "./browse/Browse";
+import Admin from "./admin/Admin";
 
 function App() {
-    if (!window.localStorage.getItem('cart') || JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('prod'))) {
+    if (!window.localStorage.getItem('cart') /*|| JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('prod'))*/) {
         window.localStorage.setItem('cart', '[]')
     }
     return (
@@ -18,6 +19,9 @@ function App() {
                 <Switch>
                     <Route path="/cart">
                         <Cart />
+                    </Route>
+                    <Route path="/admin">
+                        <Admin />
                     </Route>
                     <Route path="/:id" children={<ProductPage />}/>
                     <Route path="/">

@@ -18,20 +18,21 @@ let db;
 
 exports.products = functions.https.onRequest(async (request, response) => {
 
-    const prices = await stripe.prices.list({active: true, expand: ['data.product']});
+    //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
 
-    //prices.forEach(v => console.log(v.data[0]));
+    const products = await stripe.products.list({active: true, created: {gt: 1569577232}});
+    const prices = await Promise.all(products.data.map(v => (stripe.prices.list({product: v.id}))));
+    const productsWithPrices = products.data.map(v => ({...v, prices: prices.find(p => v.id === p.data[0].product)}))
+
+    //prices.data.forEach(v => console.log(v.product.images));
 
     response.send({
-        products: prices.data.filter(v => v.product.active === true).map(v => ({
-            id: v.product.id,
-            title: v.product.name,
-            subtitle: v.product.description,
-            img: v.product.images[0],
-            price: {
-                id: v.id,
-                amount: v.unit_amount
-            }
+        products: productsWithPrices.map(v => ({
+            id: v.id,
+            title: v.name,
+            subtitle: v.description,
+            images: v.images,
+            prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount})),
         }))
     })
 })
@@ -53,7 +54,8 @@ exports.productDetails = functions.https.onRequest(async (request, response) => 
 
     response.send({
         id: product.id,
-        description: description,
+        description: product.description,
+        longDescription: description,
         name: product.name,
         images: product.images,
         unit_label: product.unit_label,
@@ -69,21 +71,20 @@ exports.productDetails = functions.https.onRequest(async (request, response) => 
  * Provides details (name, price, etc) on a list of prices.
  */
 exports.cartDetails = functions.https.onRequest(async (request, response) => {
-    const priceList = request.body.priceList;
-    console.log(priceList)
+    const productList = request.body.productList;
 
-    const products = await Promise.all(priceList.map(v => stripe.prices.retrieve(v, {expand: ['product']})));
+    //const products = await Promise.all(priceList.map(v => stripe.prices.retrieve(v, {expand: ['product']})));
+    const prices = await Promise.all(productList.map(v => stripe.prices.list({product: v})))
+    const products = await Promise.all(productList.map(v => stripe.products.retrieve(v)))
+    const productsWithPrices = products.map(v => ({...v, prices: prices.find(p => p.data[0].product === v.id)}))
 
-    console.log(products)
+    console.log(productsWithPrices)
 
-    const r = {products: products.map(v => ({
-            id: v.product.id,
-            name: v.product.name,
-            image: v.product.images[0],
-            price: {
-                amount: v.unit_amount,
-                id: v.id,
-            }
+    const r = {products: productsWithPrices.map(v => ({
+            id: v.id,
+            name: v.name,
+            image: v.images[0],
+            prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
         })), shipping: 550};
 
     response.send(r)
@@ -101,4 +102,8 @@ exports.checkout = functions.https.onRequest((request, response) => {
     })
         .then(result => response.json({id: result.id}))
         .catch(error => response.send(error));
+})
+
+exports.addProductDetails = functions.https.onRequest((request, response) => {
+
 })

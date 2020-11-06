@@ -89,18 +89,18 @@ const Feed = (props) => {
             {props.products.map((tile) => (
                 <GridListTile>
                     <Link to={'/'+tile.id}>
-                        <img className={classes.img} src={tile.img}  alt={tile.alt}/>
+                        <img className={classes.img} src={tile.images[0]}  alt={tile.alt}/>
                     </Link>
                         <GridListTileBar
                             id={tile.id}
                             title={tile.title+(tile.subtitle !== null ? ' – '+tile.subtitle : '')}
-                            subtitle={cartList.find(v => tile.price.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.price.amount/100}
+                            subtitle={cartList.find(v => tile.prices.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.prices[0].amount/100}
                             className={classes.clickable}
                             onClick={e => handleGotoProduct(e, tile.id)}
                             actionIcon={
                                 <IconButton
                                     className={classes.icon}
-                                    onClick={e => handleAddToCart(e, tile.price.id)}
+                                    onClick={e => handleAddToCart(e, tile.id)}
                                 >
                                     <AddShoppingCart />
                                 </IconButton>
