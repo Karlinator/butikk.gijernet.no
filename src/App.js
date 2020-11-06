@@ -10,7 +10,7 @@ import Browse from "./browse/Browse";
 import Admin from "./admin/Admin";
 
 function App() {
-    if (!window.localStorage.getItem('cart') /*|| JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('prod'))*/) {
+    if (!window.localStorage.getItem('cart') || JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('price'))) {
         window.localStorage.setItem('cart', '[]')
     }
     return (
