@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.leavingScreen,
         }),
         marginLeft: -drawerWidth,
-        marginTop: 40
+        marginTop: 50
     },
     contentShift: {
         transition: theme.transitions.create('margin', {
@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.enteringScreen,
         }),
         marginLeft: 0,
-        marginTop: 40
+        marginTop: 50
     },
     headline: {
         flexGrow: 1,

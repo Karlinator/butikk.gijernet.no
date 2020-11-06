@@ -95,9 +95,9 @@ const Cart = () => {
     }
 
     const handleRemoveFromCart = (e, id) => {
-        const p = products.filter(v => v.price.id !== id)
+        const p = products.filter(v => v.id !== id)
         setProducts(p);
-        window.localStorage.setItem('cart', JSON.stringify(p.map(v => ({id: v.price.id, num: v.quantity}))))
+        window.localStorage.setItem('cart', JSON.stringify(p.map(v => ({id: v.id, num: v.quantity}))))
     }
 
     const handleCheckout = async () => {
@@ -289,9 +289,11 @@ const CartList = (props) => {
                             <TableCell align="center">{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.amount/100}</TableCell>
                             <TableCell align="center">{(row.price.singles * row.price.basePrice.amount + row.price.packs * row.price.amount)/100}</TableCell>
                             <TableCell align="center">
-                                <RemoveShoppingCart
-                                    onClick={e => props.onRemove(e, row.price.id)}
-                                />
+                                <IconButton
+                                    onClick={e => props.onRemove(e, row.id)}
+                                >
+                                    <RemoveShoppingCart />
+                                </IconButton>
                             </TableCell>
                         </TableRow>
                     ))}
