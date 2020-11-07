@@ -97,7 +97,12 @@ exports.checkout = functions.https.onRequest((request, response) => {
         line_items: JSON.parse(request.body),
         mode: "payment",
         success_url: "https://store.gijernet.no/takk",
-        cancel_url: "https://store.gijernet.no/avbrutt"
+        cancel_url: "https://store.gijernet.no/avbrutt",
+        billing_address_collection: 'auto',
+        shipping_address_collection: {
+            allowed_countries: ['NO']
+        }
+
 
     })
         .then(result => response.json({id: result.id}))
