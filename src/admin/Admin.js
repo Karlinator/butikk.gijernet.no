@@ -52,7 +52,7 @@ const Admin = () => {
     }
 
     const handleDescriptionChange = (id) => (e) => {
-        setProducts({...products, [id]: {...products[id], longDescription: e.target.value}})
+        setProducts(products.map(p => p.id === id ? ({...p, longDescription: e.target.value}) : p))
     }
 
     const handleCredentialsChange = (prop) => (e) => setCredentials(c => ({...c, [prop]: e.target.value}))
@@ -91,11 +91,12 @@ const Admin = () => {
     }
 
     useEffect(() => {
-        fetch('/api/products')
+        fetch('/api/products?descriptions=true')
             .then(v => v.json())
             .then(v => {
                 // { [productId]: [{file: null, uri: "cloud.storage.whatever/file"}]}
                 setProducts(v.products);
+                console.log(v.products)
                 setPictures(v.products.reduce((a, key) => Object.assign(a, { [key.id]: key.images.filter(i => !i.includes('stripe.com')).map(i => ({file: null, uri: i}))}), {}));
                 setLoading(false);
             })

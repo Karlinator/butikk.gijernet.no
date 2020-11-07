@@ -17,13 +17,30 @@ let db;
 
 
 exports.products = functions.https.onRequest(async (request, response) => {
+    db = admin.firestore();
 
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
     //TODO: page through if more than 100 products
     const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}});
     const prices = await stripe.prices.list({limit: 100, created: {gt: 1569567232}});
-    const productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
+    let productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
     const types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
+
+    if (request.query.descriptions === 'true') {
+        productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
+            const productDesc = await db.collection('products').doc(p.id).get()
+            //console.log(productDesc)
+            let description;
+            console.log(p.name, productDesc.data())
+            try {
+                description = productDesc.data().description
+            } catch {
+                description = ''
+            }
+            return {...p, longDescription: description}
+
+        }))
+    }
 
     //prices.data.forEach(v => console.log(v.product.images));
     //console.log(productsWithPrices)
@@ -35,7 +52,8 @@ exports.products = functions.https.onRequest(async (request, response) => {
             subtitle: v.description,
             images: v.images,
             prices: v.prices.map(p => ({id: p.id, amount: p.unit_amount})),
-            type: v.metadata.type
+            type: v.metadata.type,
+            longDescription: v.longDescription
         })),
         types: types
     })
