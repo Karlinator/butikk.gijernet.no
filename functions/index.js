@@ -33,6 +33,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
             subtitle: v.description,
             images: v.images,
             prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount})),
+            type: v.metadata.type
         }))
     })
 })
@@ -62,7 +63,8 @@ exports.productDetails = functions.https.onRequest(async (request, response) => 
         price: {
             id: prices.data[0].id,
             amount: prices.data[0].unit_amount,
-        }
+        },
+        type: product.metadata.type
     });
 
 })
