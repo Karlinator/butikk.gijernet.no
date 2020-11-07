@@ -19,13 +19,14 @@ let db;
 exports.products = functions.https.onRequest(async (request, response) => {
 
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
-
-    const products = await stripe.products.list({active: true, created: {gt: 1569577232}});
+    //TODO: page through if more than 100 products
+    const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}});
     const prices = await Promise.all(products.data.map(v => (stripe.prices.list({product: v.id}))));
     const productsWithPrices = products.data.map(v => ({...v, prices: prices.find(p => v.id === p.data[0].product)}))
     const types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
     //prices.data.forEach(v => console.log(v.product.images));
+    //console.log(productsWithPrices)
 
     response.send({
         products: productsWithPrices.map(v => ({
