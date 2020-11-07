@@ -89,6 +89,7 @@ const Browse = () => {
     const [open, setOpen] = useState(true);
     const [loading, setLoading] = useState(true);
     const [overlayOpen, setOverlayOpen] = useState(false);
+    const [types, setTypes] = useState([]);
 
     const [totalProductNum, setTotalProductNum] = useState(() => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
@@ -119,8 +120,9 @@ const Browse = () => {
             .then(
                 result => {
                     console.log(result);
-                    setLoading(false);
                     setFeed(<Feed onAddProduct={handleProductNumChange} products={result.products}/>);
+                    setTypes(result.types)
+                    setLoading(false);
                 },
                 (error) => {
                     setLoading(false);
@@ -202,7 +204,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    <Controls/>
+                    {loading ? '' : <Controls types={types}/>}
                 </Drawer>
             </Hidden>
             <Hidden only="xs">
@@ -230,7 +232,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    <Controls/>
+                    {loading ? '' : <Controls types={types}/>}
                 </Drawer>
             </Hidden>
             <main

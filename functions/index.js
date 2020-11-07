@@ -23,6 +23,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
     const products = await stripe.products.list({active: true, created: {gt: 1569577232}});
     const prices = await Promise.all(products.data.map(v => (stripe.prices.list({product: v.id}))));
     const productsWithPrices = products.data.map(v => ({...v, prices: prices.find(p => v.id === p.data[0].product)}))
+    const types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
     //prices.data.forEach(v => console.log(v.product.images));
 
@@ -34,7 +35,8 @@ exports.products = functions.https.onRequest(async (request, response) => {
             images: v.images,
             prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount})),
             type: v.metadata.type
-        }))
+        })),
+        types: types
     })
 })
 
