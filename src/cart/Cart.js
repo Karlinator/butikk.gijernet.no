@@ -18,6 +18,7 @@ import {
     Modal,
 } from "@material-ui/core";
 import {ArrowBack, RemoveShoppingCart} from "@material-ui/icons";
+import { green } from '@material-ui/core/colors';
 import {Link} from "react-router-dom";
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -50,6 +51,20 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3),
     },
+    buttonProgress: {
+        color: green[500],
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -12,
+        marginLeft: -12,
+    },
+    buttonSuccess: {
+        backgroundColor: green[500],
+        '&:hover': {
+            backgroundColor: green[700],
+        },
+    },
 }));
 
 function rand() {
@@ -71,6 +86,7 @@ const Cart = () => {
     const classes = useStyles();
 
     const [loading, setLoading] = useState(true);
+    const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [products, setProducts] = useState(null);
     const [shipping, setShipping] = useState(0);
 
@@ -103,6 +119,7 @@ const Cart = () => {
     const handleCheckout = async () => {
         const stripe = await loadStripe(process.env.REACT_APP_STRIPE_KEY)
         const prices = products.map(v => (calculateBestPrice(v.prices, v.quantity)))
+        setLoadingSubmit(true)
         console.log(prices)
         let request = [];
         prices.forEach(v => {
@@ -238,7 +255,16 @@ const Cart = () => {
             </AppBar>
             <Container>
                 {cart}
-                <Button onClick={handleCheckout} className={classes.order} variant="contained" color="primary">Kjøp</Button>
+                <Button
+                    onClick={handleCheckout}
+                    className={classes.order}
+                    variant="contained"
+                    color="primary"
+                    disabled={loadingSubmit}
+                >
+                    Kjøp
+                    {loadingSubmit && <CircularProgress size={24} className={classes.buttonProgress} />}
+                </Button>
             </Container>
             <Modal
                 open={modalOpen}
