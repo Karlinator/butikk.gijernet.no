@@ -90,6 +90,7 @@ const Browse = () => {
     const [loading, setLoading] = useState(true);
     const [overlayOpen, setOverlayOpen] = useState(false);
     const [types, setTypes] = useState([]);
+    const [products, setProducts] = useState(null)
 
     const [totalProductNum, setTotalProductNum] = useState(() => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
@@ -98,6 +99,12 @@ const Browse = () => {
     const handleProductNumChange = () => {
         console.log(totalProductNum)
         setTotalProductNum(totalProductNum => totalProductNum + 1);
+    }
+
+    const handleFilter = (search, filter) => {
+        setFeed(<Feed
+            onAddProduct={handleProductNumChange}
+            products={products.filter(v=> filter[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}/>);
     }
 
     const [feed, setFeed] = useState(
@@ -119,7 +126,7 @@ const Browse = () => {
             .then(res => res.json())
             .then(
                 result => {
-                    console.log(result);
+                    setProducts(result.products)
                     setFeed(<Feed onAddProduct={handleProductNumChange} products={result.products}/>);
                     setTypes(result.types)
                     setLoading(false);
@@ -204,7 +211,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {loading ? '' : <Controls types={types}/>}
+                    {loading ? '' : <Controls types={types} onChange={handleFilter}/>}
                 </Drawer>
             </Hidden>
             <Hidden only="xs">
@@ -232,7 +239,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {loading ? '' : <Controls types={types}/>}
+                    {loading ? '' : <Controls types={types} onChange={handleFilter}/>}
                 </Drawer>
             </Hidden>
             <main

@@ -3,13 +3,24 @@ import {Container, TextField, FormGroup, FormLabel, FormControlLabel, Checkbox} 
 
 const Controls = (props) => {
     const [filters, setFilters] = useState(props.types.reduce((a, key) => Object.assign(a, {[key]: true}), {}))
-    console.log(filters)
+    const [search, setSearch] = useState('')
+
+    const handleSearch = (e) => {
+        setSearch(e.target.value)
+        props.onChange(e.target.value, filters)
+    }
+
     const handleChange = (id) => () => {
-        setFilters(filters => ({...filters, [id]: !filters[id]}))
+        setFilters(filters => {
+            const filtersNew = {...filters, [id]: !filters[id]}
+            props.onChange(search, filtersNew)
+            return filtersNew
+        })
+
     }
     return(
         <Container>
-            <TextField variant='filled' label="Søk" />
+            <TextField variant='filled' label="Søk" value={search} onChange={handleSearch} />
             <FormLabel component="legend">Velg produkttyper</FormLabel>
             <FormGroup>
                 {props.types.map(v => (
