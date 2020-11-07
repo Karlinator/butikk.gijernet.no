@@ -11,7 +11,10 @@ import {
     CircularProgress, Container, Button, IconButton
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {Delete} from "@material-ui/icons";
+import {Delete, Image, Save} from "@material-ui/icons";
+import {storage, firebaseConfig} from "../firebase";
+import {FirebaseAuthConsumer, FirebaseAuthProvider} from "@react-firebase/auth";
+import firebase from "firebase";
 
 const useStyles = makeStyles(() => ({
     headline: {
@@ -32,7 +35,8 @@ const useStyles = makeStyles(() => ({
 
 const Admin = () => {
     const classes = useStyles();
-    const [products, setProducts] = useState();
+    const [products, setProducts] = useState(null);
+    const [credentials, setCredentials] = useState({username: '', password: ''})
     const [loading, setLoading] = useState(true);
     const [pictures, setPictures] = useState({})
 
@@ -45,6 +49,45 @@ const Admin = () => {
 
     const handleRemovePicture = (uri, id) => () => {
         setPictures({...pictures, [id]: [...pictures[id].filter(i => i.uri !== uri)]});
+    }
+
+    const handleDescriptionChange = (id) => (e) => {
+        setProducts({...products, [id]: {...products[id], longDescription: e.target.value}})
+    }
+
+    const handleCredentialsChange = (prop) => (e) => setCredentials(c => ({...c, [prop]: e.target.value}))
+
+    const handleSignIn = () => {
+        firebase.auth().signInWithEmailAndPassword(credentials.username, credentials.password)
+            .catch((error) => console.log(error))
+        setCredentials({username: '', password: ''})
+    }
+
+    const handleSignOut = () => firebase.auth().signOut()
+
+    const handleSubmit = async () => {
+        // Upload to Storage with SDK
+        // Send url to the function
+        console.log(Object.entries(pictures))
+        const storageRef = storage.ref()
+        //const imagesRef = Object.entries(pictures).filter(v => v[1].length > 0).map(v => ({file: v[1], ref: storageRef.child('images/'+v[0]+'/'+v[1].file.name)}))
+        const imagesRef = Object.entries(pictures).map(v => ({id: v[0], images: v[1].filter(i => i.uri.includes('blob:')).map(i => ({ref: storageRef.child('images/'+v[0]+'/'+i.file.name), file: i.file}))}))
+        console.log(imagesRef)
+        const result = await Promise.all(imagesRef.map(v => v.images.map(i => i.ref.put(i.file))))
+        const storageError = result.filter(v => v.filter(i => i.error_ !== null).length > 0)
+        if (storageError) console.log("Noe gikk kanskje galt her...", result)
+
+        const request = products.map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+v.ref.location.path)]}))
+        console.log(request)
+        await fetch('/api/addProductDetails', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(request)
+        })
+
+
     }
 
     useEffect(() => {
@@ -74,62 +117,120 @@ const Admin = () => {
         )
     }
     return (
-        <div>
-            <TableContainer>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Produkt</TableCell>
-                            <TableCell>Bilder</TableCell>
-                            <TableCell>Beskrivelse</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {products.map(v => (
-                            <TableRow key={v.id}>
-                                <TableCell>{v.title}</TableCell>
-                                <TableCell>
-                                    {pictures[v.id].map(i => (
-                                        <div>
-                                            <img
-                                                alt=""
-                                                className={classes.imgList}
-                                                src={i.uri}
-                                            />
-                                            <IconButton
-                                                onClick={handleRemovePicture(i.uri, v.id)}
-                                            >
-                                                <Delete />
-                                            </IconButton>
-                                        </div>
-                                    ))}
-                                    <Button
-                                        variant="contained"
-                                        component="label"
-                                    >
-                                        Nytt bilde
-                                        <input
-                                            type="file"
-                                            style={{display: 'none'}}
-                                            onChange={handleAddPicture(v.id)}
-                                            multiple
-                                        />
-                                    </Button>
-                                </TableCell>
-                                <TableCell align="center">
+        <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
+            <FirebaseAuthConsumer>
+                {({isSignedIn}) => {
+                    if (isSignedIn) {
+                        return (
+                            <div>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleSignOut}
+                                >
+                                    Logg ut
+                                </Button>
+                                <TableContainer>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Produkt</TableCell>
+                                                <TableCell>Bilder</TableCell>
+                                                <TableCell>Beskrivelse</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {products.map(v => (
+                                                <TableRow key={v.id}>
+                                                    <TableCell>{v.title}</TableCell>
+                                                    <TableCell>
+                                                        {pictures[v.id].map(i => (
+                                                            <div>
+                                                                <img
+                                                                    alt=""
+                                                                    className={classes.imgList}
+                                                                    src={i.uri}
+                                                                />
+                                                                <IconButton
+                                                                    onClick={handleRemovePicture(i.uri, v.id)}
+                                                                >
+                                                                    <Delete />
+                                                                </IconButton>
+                                                            </div>
+                                                        ))}
+                                                        <Button
+                                                            variant="contained"
+                                                            component="label"
+                                                            startIcon={<Image/>}
+                                                        >
+                                                            Nytt bilde
+                                                            <input
+                                                                type="file"
+                                                                style={{display: 'none'}}
+                                                                onChange={handleAddPicture(v.id)}
+                                                                accept="image/jpg image/png"
+                                                                multiple
+                                                            />
+                                                        </Button>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <TextField
+                                                            variant="filled"
+                                                            multiline
+                                                            value={v.longDescription}
+                                                            onChange={handleDescriptionChange(v.id)}
+                                                            className={classes.description}
+                                                        />
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSubmit}
+                                    startIcon={<Save/>}
+                                    color="primary"
+                                >
+                                    Lagre
+                                </Button>
+                            </div>
+                        )
+                    } else {
+                        return (
+                            <Container>
+                                <div>
                                     <TextField
+                                        value={credentials.username}
+                                        onChange={handleCredentialsChange('username')}
+                                        label="Brukernavn"
                                         variant="filled"
-                                        multiline
-                                        value={v.longDescription}
-                                        className={classes.description}
                                     />
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </div>
+                                </div>
+                                <div>
+                                    <TextField
+                                        value={credentials.password}
+                                        onChange={handleCredentialsChange('password')}
+                                        label="Passord"
+                                        type="password"
+                                        variant="filled"
+                                    />
+                                </div>
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSignIn}
+                                >
+                                    Logg inn
+                                </Button>
+                            </Container>
+                        )
+                    }
+
+                }}
+            </FirebaseAuthConsumer>
+
+        </FirebaseAuthProvider>
     )
 }
 

@@ -5,8 +5,10 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@react-firebase/auth": "^0.2.10",
     "@stripe/stripe-js": "^1.11.0",
     "cra-template": "1.1.0",
+    "firebase": "^8.0.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",

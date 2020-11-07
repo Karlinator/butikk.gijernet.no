@@ -115,5 +115,5 @@ exports.checkout = functions.https.onRequest((request, response) => {
 })
 
 exports.addProductDetails = functions.https.onRequest((request, response) => {
-
+    console.log(request.body)
 })

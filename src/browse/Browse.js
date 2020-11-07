@@ -133,7 +133,8 @@ const Browse = () => {
                 },
                 (error) => {
                     setLoading(false);
-                    setFeed(error);
+                    console.log(error)
+                    setFeed(<span>{error.toString()}</span>);
                 }
             )
     // eslint-disable-next-line
