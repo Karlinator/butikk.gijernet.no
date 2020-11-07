@@ -87,7 +87,7 @@ const Feed = (props) => {
     return (
         <GridList cols={getGridListCols()} spacing={16} className={classes.gridList}>
             {props.products.map((tile) => (
-                <GridListTile>
+                <GridListTile key={tile.id}>
                     <Link to={'/'+tile.id}>
                         <img className={classes.img} src={tile.images[0]}  alt={tile.alt}/>
                     </Link>

@@ -95,7 +95,8 @@ const Browse = () => {
         return cart.reduce((total, item) => total + parseInt(item.num), 0);
     });
     const handleProductNumChange = () => {
-        setTotalProductNum(totalProductNum + 1);
+        console.log(totalProductNum)
+        setTotalProductNum(totalProductNum => totalProductNum + 1);
     }
 
     const [feed, setFeed] = useState(
