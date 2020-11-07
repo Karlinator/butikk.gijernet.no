@@ -21,8 +21,8 @@ exports.products = functions.https.onRequest(async (request, response) => {
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
     //TODO: page through if more than 100 products
     const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}});
-    const prices = await Promise.all(products.data.map(v => (stripe.prices.list({product: v.id}))));
-    const productsWithPrices = products.data.map(v => ({...v, prices: prices.find(p => v.id === p.data[0].product)}))
+    const prices = await stripe.prices.list({limit: 100, created: {gt: 1569567232}});
+    const productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
     const types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
     //prices.data.forEach(v => console.log(v.product.images));
@@ -34,7 +34,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
             title: v.name,
             subtitle: v.description,
             images: v.images,
-            prices: v.prices.data.filter(p => !p.transform_quantity).map(p => ({id: p.id, amount: p.unit_amount})),
+            prices: v.prices.map(p => ({id: p.id, amount: p.unit_amount})),
             type: v.metadata.type
         })),
         types: types
