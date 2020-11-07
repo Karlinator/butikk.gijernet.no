@@ -66,55 +66,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-/*const product = {
-    id: "prod_IJSWK9F74S0OPe",
-    title: "Test",
-    image: "/logo512.png",
-    price: 420,
-    variants: [
-        {
-            id: "dfjkasljfdasl",
-            title: "type 1",
-            img: "/logo512.png"
-        },
-        {
-            id: "gsdfgersa",
-            title: "type 2",
-            img: "/logo512.png"
-        },
-        {
-            id: "fsd",
-            title: "type 3",
-            img: "/logo512.png"
-        },
-        {
-            id: "hgsdfg",
-            title: "type 4",
-            img: "/logo512.png"
-        },
-        {
-            id: "gsdfjhdfghfggersa",
-            title: "type 5",
-            img: "/logo512.png"
-        },
-        {
-            id: "das",
-            title: "type 6",
-            img: "/logo512.png"
-        },
-        {
-            id: "fsdhgrrhdfg",
-            title: "type 7",
-            img: "/logo512.png"
-        },
-        {
-            id: "gsdfjhdfggdfhfdshfggersa",
-            title: "type 8",
-            img: "/logo512.png"
-        },
-    ]
-}*/
-
 const ProductPage = () => {
     const classes = useStyles();
     const [totalProductNum, setTotalProductNum] = useState(() => {
@@ -207,7 +158,7 @@ const Product = (props) => {
             <Container>
                 <img className={classes.coverImg} alt={props.product.title} src={selected} />
             </Container>
-            <GridList className={classes.gridList}>
+            {props.product.images.length > 1 ? <GridList className={classes.gridList}>
                 {props.product.images.map((img) => (
                     <GridListTile
                         cols={2}
@@ -218,7 +169,7 @@ const Product = (props) => {
                         <img className={classes.img} alt="" src={img} />
                     </GridListTile>
                 ))}
-            </GridList>
+            </GridList> : ''}
             <Container>
                 <Typography variant="h3" component="h1">{props.product.name}</Typography>
                 <Typography variant="h5" component="h3">{props.product.description}</Typography>
