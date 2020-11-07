@@ -4,6 +4,7 @@ import {makeStyles} from "@material-ui/core/styles";
 import {AddShoppingCart, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import { useHistory } from 'react-router-dom';
+import clsx from "clsx";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -21,11 +22,21 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: theme.palette.background.paper,
     },
     img: {
-        height: 'auto%',
+        height: 'auto',
         width: '100%'
     },
     clickable: {
         cursor: 'pointer',
+    },
+    titleBar: {
+        backgroundColor: theme.palette.background.paper
+
+    },
+    title: {
+        color: theme.palette.text.primary
+    },
+    tile: {
+        height: '100%',
     }
 }));
 
@@ -87,19 +98,23 @@ const Feed = (props) => {
     return (
         <GridList cols={getGridListCols()} spacing={16} className={classes.gridList}>
             {props.products.map((tile) => (
-                <GridListTile key={tile.id}>
+                <GridListTile className={classes.tile} key={tile.id} rows={1.3}>
                     <Link to={'/'+tile.id}>
                         <img className={classes.img} src={tile.images[0]}  alt={tile.alt}/>
                     </Link>
                         <GridListTileBar
                             id={tile.id}
-                            title={tile.title+(tile.subtitle !== null ? ' – '+tile.subtitle : '')}
-                            subtitle={cartList.find(v => tile.prices.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.prices[0].amount/100}
-                            className={classes.clickable}
+                            title={tile.title}
+                            subtitle={cartList.find(v => tile.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.prices[0].amount/100}
+                            classes={{
+                                root: clsx(classes.clickable, classes.titleBar),
+                                title: classes.title,
+                                subtitle: classes.title,
+                            }}
                             onClick={e => handleGotoProduct(e, tile.id)}
                             actionIcon={
                                 <IconButton
-                                    className={classes.icon}
+                                    className={clsx(classes.icon, classes.title)}
                                     onClick={e => handleAddToCart(e, tile.id)}
                                 >
                                     <AddShoppingCart />
