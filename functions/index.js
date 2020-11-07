@@ -33,7 +33,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
             title: v.name,
             subtitle: v.description,
             images: v.images,
-            prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount})),
+            prices: v.prices.data.filter(p => !p.transform_quantity).map(p => ({id: p.id, amount: p.unit_amount})),
             type: v.metadata.type
         })),
         types: types
