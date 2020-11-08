@@ -16,7 +16,7 @@ import {storage, firebaseConfig} from "../firebase";
 import {FirebaseAuthConsumer, FirebaseAuthProvider} from "@react-firebase/auth";
 import firebase from "firebase";
 
-firebase.functions().useEmulator("localhost", 5001);
+//firebase.functions().useEmulator("localhost", 5001);
 
 const useStyles = makeStyles(() => ({
     headline: {
