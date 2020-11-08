@@ -18,9 +18,14 @@ import {
 } from "@material-ui/core";
 import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
+import firebase from "firebase";
 
 const drawerWidth = 240;
 
+const functions = firebase.app().functions('europe-west1')
+if (process.env.REACT_APP_EMULATORS) {
+    functions.useEmulator("localhost", 5001)
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -122,13 +127,12 @@ const Browse = () => {
         </Container>);
 
     useEffect(() => {
-        fetch('/api/products')
-            .then(res => res.json())
+        functions.httpsCallable('products')({descriptions: false})
             .then(
                 result => {
-                    setProducts(result.products)
-                    setFeed(<Feed onAddProduct={handleProductNumChange} products={result.products}/>);
-                    setTypes(result.types)
+                    setProducts(result.data.products)
+                    setFeed(<Feed onAddProduct={handleProductNumChange} products={result.data.products}/>);
+                    setTypes(result.data.types)
                     setLoading(false);
                 },
                 (error) => {

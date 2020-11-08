@@ -16,7 +16,7 @@ let db;
 // });
 
 
-exports.products = functions.https.onRequest(async (request, response) => {
+exports.products = functions.https.onCall(async (data) => {
     db = db || admin.firestore();
 
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
@@ -26,7 +26,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
     let productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
     const types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
-    if (request.query.descriptions === 'true') {
+    if (data.descriptions) {
         productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
             const productDesc = await db.collection('products').doc(p.id).get()
             //console.log(productDesc)
@@ -45,7 +45,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
     //prices.data.forEach(v => console.log(v.product.images));
     //console.log(productsWithPrices)
 
-    response.send({
+    return ({
         products: productsWithPrices.map(v => ({
             id: v.id,
             title: v.name,
@@ -59,12 +59,13 @@ exports.products = functions.https.onRequest(async (request, response) => {
     })
 })
 
-exports.productDetails = functions.https.onRequest(async (request, response) => {
+
+exports.productDetails = functions.region('europe-west1').https.onCall(async (data) => {
     db = db || admin.firestore();
 
-    const product = await stripe.products.retrieve(request.query.id.toString())
+    const product = await stripe.products.retrieve(data.id.toString())
     const productDesc = await db.collection('products').doc(product.id).get()
-    const prices = await stripe.prices.list({product: request.query.id.toString()})
+    const prices = await stripe.prices.list({product: data.id.toString()})
 
     let description;
     try {
@@ -74,7 +75,7 @@ exports.productDetails = functions.https.onRequest(async (request, response) => 
     }
 
 
-    response.send({
+    return ({
         id: product.id,
         description: product.description,
         longDescription: description,
@@ -93,8 +94,8 @@ exports.productDetails = functions.https.onRequest(async (request, response) => 
 /**
  * Provides details (name, price, etc) on a list of prices.
  */
-exports.cartDetails = functions.https.onRequest(async (request, response) => {
-    const productList = request.body.productList;
+exports.cartDetails = functions.region('europe-west1').https.onCall(async (data) => {
+    const productList = data.productList;
 
     //const products = await Promise.all(priceList.map(v => stripe.prices.retrieve(v, {expand: ['product']})));
     const prices = await Promise.all(productList.map(v => stripe.prices.list({product: v})))
@@ -103,21 +104,19 @@ exports.cartDetails = functions.https.onRequest(async (request, response) => {
 
     console.log(productsWithPrices)
 
-    const r = {products: productsWithPrices.map(v => ({
+    return {products: productsWithPrices.map(v => ({
             id: v.id,
             name: v.name,
             image: v.images[0],
             prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
         })), shipping: 550};
-
-    response.send(r)
 })
 
-exports.checkout = functions.https.onRequest((request, response) => {
-    console.log(request.body)
-    stripe.checkout.sessions.create({
+exports.checkout = functions.https.onCall(async (data) => {
+    console.log(data.body)
+    const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: JSON.parse(request.body),
+        line_items: JSON.parse(data.body),
         mode: "payment",
         success_url: "https://store.gijernet.no/takk",
         cancel_url: "https://store.gijernet.no/avbrutt",
@@ -125,14 +124,15 @@ exports.checkout = functions.https.onRequest((request, response) => {
         shipping_address_collection: {
             allowed_countries: ['NO']
         }
-
-
     })
-        .then(result => response.json({id: result.id}))
-        .catch(error => response.send(error));
+    try {
+        return {id: session.id}
+    } catch {
+        return {message: session}
+    }
 })
 
-exports.addProductDetails = functions.https.onCall(async (data, context) => {
+exports.addProductDetails = functions.region('europe-west1').https.onCall(async (data, context) => {
     if (!context.auth) {
         return {message: "Authentication Required", code: 401}
     }

@@ -21,6 +21,12 @@ import {ArrowBack, RemoveShoppingCart} from "@material-ui/icons";
 import { green } from '@material-ui/core/colors';
 import {Link} from "react-router-dom";
 import { loadStripe } from '@stripe/stripe-js';
+import firebase from "firebase";
+
+const functions = firebase.app().functions('europe-west1')
+if (process.env.REACT_APP_EMULATORS) {
+    functions.useEmulator("localhost", 5001)
+}
 
 const useStyles = makeStyles((theme) => ({
     table: {
@@ -140,15 +146,11 @@ const Cart = () => {
             return;
         }
 
-        const response = await fetch('/api/checkout', {
-            method: 'POST',
-            body: JSON.stringify(request)
-        });
-        const session = await response.json();
+        const response = await functions.httpsCallable('checkout')({request});
 
 
         const result = await stripe.redirectToCheckout({
-            sessionId: session.id,
+            sessionId: response.id,
         })
 
         if (result.error) {
@@ -200,20 +202,13 @@ const Cart = () => {
     useEffect(() => {
         const cartList = JSON.parse(window.localStorage.getItem('cart'));
         const productList = cartList.map(item => item.id);
-        fetch('/api/cartDetails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({productList: productList})
-        })
-            .then(result => result.json())
+        functions.httpsCallable('cartDetails')({productList: productList})
             .then(result => {
                 setLoading(false);
-                console.log(result)
-                setProducts(result.products.map(v =>
+                console.log(result.data)
+                setProducts(result.data.products.map(v =>
                     ({...v, quantity: cartList.find(c => c.id === v.id).num})));
-                setShipping(result.shipping);
+                setShipping(result.data.shipping);
         // eslint-disable-next-line
     })}, [])
 

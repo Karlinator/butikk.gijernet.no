@@ -16,7 +16,10 @@ import {storage, firebaseConfig} from "../firebase";
 import {FirebaseAuthConsumer, FirebaseAuthProvider} from "@react-firebase/auth";
 import firebase from "firebase";
 
-//firebase.functions().useEmulator("localhost", 5001);
+const functions = firebase.app().functions('europe-west1')
+if (process.env.REACT_APP_EMULATORS) {
+    functions.useEmulator("localhost", 5001)
+}
 
 const useStyles = makeStyles(() => ({
     headline: {
@@ -83,7 +86,7 @@ const Admin = () => {
 
         const request = products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+encodeURI(v.ref.location.path).replaceAll('/', '%2F')+'?alt=media')]}))
         console.log(request)
-        firebase.functions().httpsCallable('addProductDetails')(request)
+        functions.httpsCallable('addProductDetails')(request)
             .then(result => console.log(result))
             .catch(error => console.log(error))
 
@@ -91,12 +94,12 @@ const Admin = () => {
 
     useEffect(() => {
         fetch('/api/products?descriptions=true')
-            .then(v => v.json())
+        functions.httpsCallable('products')({descriptions: true})
             .then(v => {
                 // { [productId]: [{file: null, uri: "cloud.storage.whatever/file"}]}
-                setProducts(v.products);
-                console.log(v.products)
-                setPictures(v.products.reduce((a, key) => Object.assign(a, { [key.id]: key.images.filter(i => !i.includes('stripe.com')).map(i => ({file: null, uri: i}))}), {}));
+                setProducts(v.data.products);
+                console.log(v.data.products)
+                setPictures(v.data.products.reduce((a, key) => Object.assign(a, { [key.id]: key.images.filter(i => !i.includes('stripe.com')).map(i => ({file: null, uri: i}))}), {}));
                 setLoading(false);
             })
     }, [])
