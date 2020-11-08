@@ -18,15 +18,10 @@ import {
 } from "@material-ui/core";
 import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
-import firebase from "firebase";
-import "../firebase";
+import {functions} from "../firebase";
 
 const drawerWidth = 240;
 
-const functions = firebase.app().functions('europe-west1')
-if (process.env.NODE_ENV === 'development') {
-    functions.useEmulator("localhost", 5001)
-}
 
 const useStyles = makeStyles((theme) => ({
     root: {

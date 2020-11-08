@@ -1,5 +1,7 @@
 import firebase from 'firebase/app'
 import 'firebase/storage'
+import 'firebase/functions'
+import 'firebase/auth'
 
 const firebaseConfig = {
     apiKey: "AIzaSyBMfRunxxEEb-1mWRbDXYQCxFnTLTtD0FE",
@@ -16,8 +18,14 @@ firebase.initializeApp(firebaseConfig);
 
 const storage = firebase.storage()
 
+const functions = firebase.app().functions('europe-west1')
+const auth = firebase.auth()
+
+if (process.env.NODE_ENV !== 'development') {
+    functions.useEmulator("localhost", 5001)
+}
 
 export  {
-    storage, firebaseConfig, firebase as default
+    storage, firebaseConfig, functions, auth, firebase as default
 }
 

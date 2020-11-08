@@ -12,15 +12,8 @@ import {
 } from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import {Delete, Image, Save} from "@material-ui/icons";
-import {storage, firebaseConfig} from "../firebase";
+import firebase, {storage, firebaseConfig, functions, auth} from "../firebase";
 import {FirebaseAuthConsumer, FirebaseAuthProvider} from "@react-firebase/auth";
-import firebase from "firebase";
-import "../firebase";
-
-const functions = firebase.app().functions('europe-west1')
-if (process.env.NODE_ENV === 'development') {
-    functions.useEmulator("localhost", 5001)
-}
 
 const useStyles = makeStyles(() => ({
     headline: {
@@ -66,12 +59,12 @@ const Admin = () => {
     const handleCredentialsChange = (prop) => (e) => setCredentials(c => ({...c, [prop]: e.target.value}))
 
     const handleSignIn = () => {
-        firebase.auth().signInWithEmailAndPassword(credentials.username, credentials.password)
+        auth.signInWithEmailAndPassword(credentials.username, credentials.password)
             .catch((error) => console.log(error))
         setCredentials({username: '', password: ''})
     }
 
-    const handleSignOut = () => firebase.auth().signOut()
+    const handleSignOut = () => auth.signOut()
 
     const handleSubmit = async () => {
         // Upload to Storage with SDK
