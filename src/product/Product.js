@@ -165,22 +165,6 @@ const Product = (props) => {
         md: useMediaQuery(theme.breakpoints.up('md')),
         sm: useMediaQuery(theme.breakpoints.up('sm')),
     }
-
-    const getGridListCols = () => {
-        if (size.xl) {
-            return 6;
-        }
-        if (size.lg) {
-            return 5;
-        }
-        if (size.md) {
-            return 6;
-        }
-        if (size.sm) {
-            return 5;
-        }
-        return 4;
-    }
     const getGridListHeight = () => {
         if (size.md) {
             return 180
@@ -197,7 +181,7 @@ const Product = (props) => {
             <Container>
                 <img className={classes.coverImg} alt={props.product.title} src={selected} />
             </Container>
-            {props.product.images.length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={getGridListCols()}>
+            {props.product.images.length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={props.product.images.length - 1}>
                 {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => {
                     const n = img.lastIndexOf('/')
                     const thumb = img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
