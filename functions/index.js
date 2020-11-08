@@ -24,7 +24,7 @@ exports.products = functions.region('europe-west1').https.onCall(async (data) =>
     const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}});
     const prices = await stripe.prices.list({limit: 100, created: {gt: 1569567232}});
     let productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
-    const types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
+    let types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
     if (data.descriptions) {
         productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
@@ -39,6 +39,18 @@ exports.products = functions.region('europe-west1').https.onCall(async (data) =>
             }
             return {...p, longDescription: description}
 
+        }))
+        types = await Promise.all(types.map(async v => {
+            const typeDesc = await db.collection('types').doc(v).get()
+            //console.log(productDesc)
+            let description;
+            //console.log(p.name, productDesc.data())
+            try {
+                description = typeDesc.data().description
+            } catch {
+                description = ''
+            }
+            return {type: v, description: description}
         }))
     }
 
@@ -64,21 +76,28 @@ exports.productDetails = functions.region('europe-west1').https.onCall(async (da
     db = db || admin.firestore();
 
     const product = await stripe.products.retrieve(data.id.toString())
-    const productDesc = await db.collection('products').doc(product.id).get()
+    const productDescDoc = await db.collection('products').doc(product.id).get()
+    const typeDescDoc = await db.collection('types').doc(product.metadata.type).get()
     const prices = await stripe.prices.list({product: data.id.toString()})
 
-    let description;
+    let productDesc;
     try {
-        description = productDesc.data().description
+        productDesc = productDescDoc.data().description
     } catch {
-        description = '';
+        productDesc = '';
+    }
+    let typeDesc;
+    try {
+        typeDesc = typeDescDoc.data().description
+    } catch {
+        typeDesc = ''
     }
 
 
     return ({
         id: product.id,
         description: product.description,
-        longDescription: description,
+        longDescription: productDesc,
         name: product.name,
         images: product.images,
         unit_label: product.unit_label,
@@ -86,7 +105,8 @@ exports.productDetails = functions.region('europe-west1').https.onCall(async (da
             id: prices.data[0].id,
             amount: prices.data[0].unit_amount,
         },
-        type: product.metadata.type
+        type: product.metadata.type,
+        type_description: typeDesc,
     });
 
 })
@@ -138,9 +158,11 @@ exports.addProductDetails = functions.region('europe-west1').https.onCall(async 
 
     db = db || admin.firestore();
 
-    await Promise.all(data.map(v => stripe.products.update(v.id, {images: v.images})))
+    await Promise.all(data.products.map(v => stripe.products.update(v.id, {images: v.images})))
 
-    await Promise.all(data.map(v => db.collection('products').doc(v.id).set({description: v.description}, {merge: true})))
+    await Promise.all(data.products.map(v => db.collection('products').doc(v.id).set({description: v.description}, {merge: true})))
+
+    await Promise.all(data.types.map(v => db.collection('types').doc(v.type).set({description: v.description}, {merge: true})))
 
     return {message: "success", code: 200}
 

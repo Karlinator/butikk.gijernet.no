@@ -21,7 +21,7 @@ const storage = firebase.storage()
 const functions = firebase.app().functions('europe-west1')
 const auth = firebase.auth()
 
-if (process.env.NODE_ENV !== 'development') {
+if (process.env.NODE_ENV !== 'production') {
     functions.useEmulator("localhost", 5001)
 }
 

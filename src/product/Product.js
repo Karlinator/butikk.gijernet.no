@@ -203,6 +203,9 @@ const Product = (props) => {
                 </Hidden>
                 <Grid item xs={12} md={8}>
                     <Typography variant="body1">
+                        {props.product.type_description}
+                    </Typography>
+                    <Typography variant="body1">
                         {props.product.longDescription}
                     </Typography>
                 </Grid>
