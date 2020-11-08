@@ -8,12 +8,19 @@ import {
     Toolbar,
     Typography, Grid, Paper, TextField, Button, Hidden, Badge, Fade, CircularProgress
 } from "@material-ui/core";
-import {AddShoppingCart, ArrowBack, ShoppingCart} from "@material-ui/icons";
+import {AddShoppingCart, ArrowBack, ShoppingCart} from "@material-ui/icons"
 import {makeStyles} from "@material-ui/core/styles";
 import {
     useParams,
     Link
 } from "react-router-dom";
+import firebase from "firebase";
+import "../firebase";
+
+const functions = firebase.app().functions('europe-west1')
+if (process.env.REACT_APP_EMULATORS) {
+    functions.useEmulator("localhost", 5001)
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -84,11 +91,11 @@ const ProductPage = () => {
 
 
     useEffect(() => {
-        fetch('/api/productDetails?id='+id)
-            .then(res => res.json())
+        functions.httpsCallable('productDetails')({id: id})
             .then(res => {
+                console.log(res.data)
                 setLoading(false)
-                setProduct(res);
+                setProduct(res.data);
             })
     // eslint-disable-next-line
     }, [])
