@@ -25,7 +25,7 @@ import firebase from "firebase";
 import "../firebase";
 
 const functions = firebase.app().functions('europe-west1')
-if (process.env.REACT_APP_EMULATORS) {
+if (process.env.REACT_APP_EMULATORS && process.env.REACT_APP_EMULATORS === 'true') {
     functions.useEmulator("localhost", 5001)
 }
 

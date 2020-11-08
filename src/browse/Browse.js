@@ -24,7 +24,7 @@ import "../firebase";
 const drawerWidth = 240;
 
 const functions = firebase.app().functions('europe-west1')
-if (process.env.REACT_APP_EMULATORS) {
+if (process.env.REACT_APP_EMULATORS && process.env.REACT_APP_EMULATORS === 'true') {
     functions.useEmulator("localhost", 5001)
 }
 

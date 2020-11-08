@@ -18,7 +18,7 @@ import firebase from "firebase";
 import "../firebase";
 
 const functions = firebase.app().functions('europe-west1')
-if (process.env.REACT_APP_EMULATORS) {
+if (process.env.REACT_APP_EMULATORS && process.env.REACT_APP_EMULATORS === 'true') {
     functions.useEmulator("localhost", 5001)
 }
 
@@ -166,16 +166,19 @@ const Product = (props) => {
                 <img className={classes.coverImg} alt={props.product.title} src={selected} />
             </Container>
             {props.product.images.length > 1 ? <GridList className={classes.gridList}>
-                {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => (
-                    <GridListTile
-                        cols={2}
-                        rows={0.8}
-                        key={img}
-                        onClick={e => handleSelectVariant(e, img)}
-                    >
-                        <img className={classes.img} alt="" src={img} />
-                    </GridListTile>
-                ))}
+                {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => {
+                    const n = img.lastIndexOf('/')
+                    const thumb = img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
+                    return    (
+                        <GridListTile
+                            cols={2}
+                            rows={0.8}
+                            key={img}
+                            onClick={e => handleSelectVariant(e, img)}
+                        >
+                            <img className={classes.img} alt="" src={thumb} />
+                        </GridListTile>
+                )})}
             </GridList> : ''}
             <Container>
                 <Typography variant="h3" component="h1">{props.product.name}</Typography>

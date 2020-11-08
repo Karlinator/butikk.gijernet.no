@@ -18,7 +18,7 @@ import firebase from "firebase";
 import "../firebase";
 
 const functions = firebase.app().functions('europe-west1')
-if (process.env.REACT_APP_EMULATORS) {
+if (process.env.REACT_APP_EMULATORS && process.env.REACT_APP_EMULATORS === 'true') {
     functions.useEmulator("localhost", 5001)
 }
 
@@ -85,7 +85,8 @@ const Admin = () => {
         const storageError = storageResult.filter(v => v.filter(i => i.error_ !== null).length > 0)
         if (storageError) console.log("Noe gikk kanskje galt her...", storageResult)
 
-        const request = products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+encodeURI(v.ref.location.path).replaceAll('/', '%2F')+'?alt=media')]}))
+        //const request = products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+encodeURI(v.ref.location.path).replaceAll('/', '%2F')+'?alt=media')]}))
+        const request = products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://static.gijernet.no/'+encodeURI(v.ref.location.path))]}))
         console.log(request)
         functions.httpsCallable('addProductDetails')(request)
             .then(result => console.log(result))

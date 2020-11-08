@@ -100,7 +100,13 @@ const Feed = (props) => {
             {props.products.map((tile) => (
                 <GridListTile className={classes.tile} key={tile.id} rows={1.3}>
                     <Link to={'/'+tile.id}>
-                        <img className={classes.img} src={tile.images[0]}  alt={tile.alt}/>
+                        <img
+                            className={classes.img}
+                            src={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {
+                                const n = i.lastIndexOf('/')
+                                return i.slice(0, n+1) + "thumb_" + i.slice(n+1)
+                            })[0]}
+                            alt={tile.alt}/>
                     </Link>
                         <GridListTileBar
                             id={tile.id}
