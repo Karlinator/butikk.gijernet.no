@@ -6,7 +6,7 @@ import {
     GridListTile,
     IconButton,
     Toolbar,
-    Typography, Grid, Paper, TextField, Button, Hidden, Badge, Fade, CircularProgress
+    Typography, Grid, Paper, TextField, Button, Hidden, Badge, Fade, CircularProgress, useMediaQuery, useTheme
 } from "@material-ui/core";
 import {AddShoppingCart, ArrowBack, ShoppingCart} from "@material-ui/icons"
 import {makeStyles} from "@material-ui/core/styles";
@@ -34,7 +34,6 @@ const useStyles = makeStyles((theme) => ({
         flexWrap: 'nowrap',
         // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
         transform: 'translateZ(0)',
-        width: '1000',
         height: 'auto',
     },
     title: {
@@ -159,19 +158,52 @@ const Product = (props) => {
     const handleSelectVariant = (e, img) => {
         setSelected(img);
     }
+    const theme = useTheme();
+    const size = {
+        xl: useMediaQuery(theme.breakpoints.up('xl')),
+        lg: useMediaQuery(theme.breakpoints.up('lg')),
+        md: useMediaQuery(theme.breakpoints.up('md')),
+        sm: useMediaQuery(theme.breakpoints.up('sm')),
+    }
+
+    const getGridListCols = () => {
+        if (size.xl) {
+            return 6;
+        }
+        if (size.lg) {
+            return 5;
+        }
+        if (size.md) {
+            return 6;
+        }
+        if (size.sm) {
+            return 5;
+        }
+        return 4;
+    }
+    const getGridListHeight = () => {
+        if (size.md) {
+            return 180
+        }
+        if (size.sm) {
+            return 130
+        }
+        return 80
+
+    }
 
     return (
         <Container className={classes.root}>
             <Container>
                 <img className={classes.coverImg} alt={props.product.title} src={selected} />
             </Container>
-            {props.product.images.length > 1 ? <GridList className={classes.gridList}>
+            {props.product.images.length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={getGridListCols()}>
                 {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => {
                     const n = img.lastIndexOf('/')
                     const thumb = img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
                     return    (
                         <GridListTile
-                            cols={2}
+                            cols={1}
                             rows={0.8}
                             key={img}
                             onClick={e => handleSelectVariant(e, img)}
