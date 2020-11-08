@@ -147,11 +147,11 @@ const Cart = () => {
             return;
         }
 
-        const response = await functions.httpsCallable('checkout')({request});
+        const response = await functions.httpsCallable('checkout')(request);
 
 
         const result = await stripe.redirectToCheckout({
-            sessionId: response.id,
+            sessionId: response.data.id,
         })
 
         if (result.error) {

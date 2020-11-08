@@ -113,10 +113,9 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
 })
 
 exports.checkout = functions.region('europe-west1').https.onCall(async (data) => {
-    console.log(data.body)
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: JSON.parse(data.body),
+        line_items: data,
         mode: "payment",
         success_url: "https://store.gijernet.no/takk",
         cancel_url: "https://store.gijernet.no/avbrutt",
