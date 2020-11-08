@@ -147,7 +147,7 @@ const ProductPage = () => {
 const Product = (props) => {
     const classes = useStyles();
 
-    const [selected, setSelected] = useState(props.product.images[0]);
+    const [selected, setSelected] = useState(props.product.images.filter(i => !i.includes('stripe.com'))[0] || props.product.images[0]);
 
     const handleSelectVariant = (e, img) => {
         setSelected(img);
@@ -159,7 +159,7 @@ const Product = (props) => {
                 <img className={classes.coverImg} alt={props.product.title} src={selected} />
             </Container>
             {props.product.images.length > 1 ? <GridList className={classes.gridList}>
-                {props.product.images.map((img) => (
+                {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => (
                     <GridListTile
                         cols={2}
                         rows={0.8}

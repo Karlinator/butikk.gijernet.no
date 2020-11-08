@@ -17,7 +17,7 @@ let db;
 
 
 exports.products = functions.https.onRequest(async (request, response) => {
-    db = admin.firestore();
+    db = db || admin.firestore();
 
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
     //TODO: page through if more than 100 products
@@ -31,7 +31,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
             const productDesc = await db.collection('products').doc(p.id).get()
             //console.log(productDesc)
             let description;
-            console.log(p.name, productDesc.data())
+            //console.log(p.name, productDesc.data())
             try {
                 description = productDesc.data().description
             } catch {
@@ -60,7 +60,7 @@ exports.products = functions.https.onRequest(async (request, response) => {
 })
 
 exports.productDetails = functions.https.onRequest(async (request, response) => {
-    db = admin.firestore();
+    db = db || admin.firestore();
 
     const product = await stripe.products.retrieve(request.query.id.toString())
     const productDesc = await db.collection('products').doc(product.id).get()
@@ -132,6 +132,17 @@ exports.checkout = functions.https.onRequest((request, response) => {
         .catch(error => response.send(error));
 })
 
-exports.addProductDetails = functions.https.onRequest((request, response) => {
-    console.log(request.body)
+exports.addProductDetails = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        return {message: "Authentication Required", code: 401}
+    }
+
+    db = db || admin.firestore();
+
+    await Promise.all(data.map(v => stripe.products.update(v.id, {images: v.images})))
+
+    await Promise.all(data.map(v => db.collection('products').doc(v.id).set({description: v.description}, {merge: true})))
+
+    return {message: "success", code: 200}
+
 })

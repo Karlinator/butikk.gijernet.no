@@ -16,6 +16,8 @@ import {storage, firebaseConfig} from "../firebase";
 import {FirebaseAuthConsumer, FirebaseAuthProvider} from "@react-firebase/auth";
 import firebase from "firebase";
 
+firebase.functions().useEmulator("localhost", 5001);
+
 const useStyles = makeStyles(() => ({
     headline: {
         flexGrow: 1,
@@ -45,14 +47,16 @@ const Admin = () => {
         // URL.CreateObjectURL is user to allow local preview before upload.
         // The file attribute is what will actually be uploaded to the server.
         setPictures({...pictures, [id]: [...pictures[id], {file: event.target.files[0], uri: URL.createObjectURL(event.target.files[0])}]})
+        setProducts(products.map(p => p.id === id ? ({...p, changed: true}) : p))
     }
 
     const handleRemovePicture = (uri, id) => () => {
         setPictures({...pictures, [id]: [...pictures[id].filter(i => i.uri !== uri)]});
+        setProducts(products.map(p => p.id === id ? ({...p, images: p.images.filter(i => i !== uri), changed: true}) : p))
     }
 
     const handleDescriptionChange = (id) => (e) => {
-        setProducts(products.map(p => p.id === id ? ({...p, longDescription: e.target.value}) : p))
+        setProducts(products.map(p => p.id === id ? ({...p, longDescription: e.target.value, changed: true}) : p))
     }
 
     const handleCredentialsChange = (prop) => (e) => setCredentials(c => ({...c, [prop]: e.target.value}))
@@ -73,20 +77,15 @@ const Admin = () => {
         //const imagesRef = Object.entries(pictures).filter(v => v[1].length > 0).map(v => ({file: v[1], ref: storageRef.child('images/'+v[0]+'/'+v[1].file.name)}))
         const imagesRef = Object.entries(pictures).map(v => ({id: v[0], images: v[1].filter(i => i.uri.includes('blob:')).map(i => ({ref: storageRef.child('images/'+v[0]+'/'+i.file.name), file: i.file}))}))
         console.log(imagesRef)
-        const result = await Promise.all(imagesRef.map(v => v.images.map(i => i.ref.put(i.file))))
-        const storageError = result.filter(v => v.filter(i => i.error_ !== null).length > 0)
-        if (storageError) console.log("Noe gikk kanskje galt her...", result)
+        const storageResult = await Promise.all(imagesRef.map(v => v.images.map(i => i.ref.put(i.file))))
+        const storageError = storageResult.filter(v => v.filter(i => i.error_ !== null).length > 0)
+        if (storageError) console.log("Noe gikk kanskje galt her...", storageResult)
 
-        const request = products.map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+v.ref.location.path)]}))
+        const request = products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+v.ref.location.path.replaceAll('/', '%2F')+'?alt=media')]}))
         console.log(request)
-        await fetch('/api/addProductDetails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(request)
-        })
-
+        firebase.functions().httpsCallable('addProductDetails')(request)
+            .then(result => console.log(result))
+            .catch(error => console.log(error))
 
     }
 
