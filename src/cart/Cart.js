@@ -21,7 +21,7 @@ import {ArrowBack, RemoveShoppingCart} from "@material-ui/icons";
 import { green } from '@material-ui/core/colors';
 import {Link} from "react-router-dom";
 import { loadStripe } from '@stripe/stripe-js';
-import {functions} from "../firebase";
+import {analytics, functions} from "../firebase";
 
 const useStyles = makeStyles((theme) => ({
     table: {
@@ -121,16 +121,17 @@ const Cart = () => {
         const stripe = await loadStripe(process.env.REACT_APP_STRIPE_KEY)
         const prices = products.map(v => (calculateBestPrice(v.prices, v.quantity)))
         setLoadingSubmit(true)
+        analytics.logEvent('begin_checkout', {currency: 'nok', items: products.map(v => ({item_id: v.id, item_list_name: v.title, item_category: v.type, quantity: v.quantity, price: prices.find(i => i.id === v.id).price.amount/100})), value: prices.reduce((t, c) => t+c.amount)/100})
         console.log(prices)
         let request = [];
         prices.forEach(v => {
             request.push({
-                price: v.id,
-                quantity: parseInt(v.packs),
+                price: v.price.id,
+                quantity: v.price.packs,
             })
             request.push({
-                price: v.basePrice.id,
-                quantity: parseInt(v.singles),
+                price: v.price.basePrice.id,
+                quantity: parseInt(v.price.singles),
             })
         });
         request = request.filter(v => v.quantity > 0)
@@ -190,19 +191,21 @@ const Cart = () => {
                     }
                 }
             })
-            return best;
+            return {price: best, amount: bestPrice};
         }
     }
 
     useEffect(() => {
         const cartList = JSON.parse(window.localStorage.getItem('cart'));
         const productList = cartList.map(item => item.id);
+
         functions.httpsCallable('cartDetails')({productList: productList})
             .then(result => {
+                const list = result.data.products.map(v => ({...v, quantity: cartList.find(c => c.id === v.id).num}))
+                analytics.logEvent('view_cart', {items: result.data.products.map(v => v.id), currency: 'nok', value: list.reduce((total, current) => total + calculateBestPrice(current.prices, current.quantity).amount)})
                 setLoading(false);
                 console.log(result.data)
-                setProducts(result.data.products.map(v =>
-                    ({...v, quantity: cartList.find(c => c.id === v.id).num})));
+                setProducts(list);
                 setShipping(result.data.shipping);
         // eslint-disable-next-line
     })}, [])

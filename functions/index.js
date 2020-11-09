@@ -75,7 +75,14 @@ exports.products = functions.region('europe-west1').https.onCall(async (data) =>
 exports.productDetails = functions.region('europe-west1').https.onCall(async (data) => {
     db = db || admin.firestore();
 
-    const product = await stripe.products.retrieve(data.id.toString())
+    let product
+
+    try {
+        product = await stripe.products.retrieve(data.id.toString())
+    } catch (e) {
+        return {message: e.message, code: e.statusCode}
+    }
+
     const productDescDoc = await db.collection('products').doc(product.id).get()
     const typeDescDoc = await db.collection('types').doc(product.metadata.type).get()
     const prices = await stripe.prices.list({product: data.id.toString()})
@@ -95,6 +102,7 @@ exports.productDetails = functions.region('europe-west1').https.onCall(async (da
 
 
     return ({
+        code: 200,
         id: product.id,
         description: product.description,
         longDescription: productDesc,

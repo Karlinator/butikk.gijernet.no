@@ -2,6 +2,7 @@ import firebase from 'firebase/app'
 import 'firebase/storage'
 import 'firebase/functions'
 import 'firebase/auth'
+import 'firebase/analytics'
 
 const firebaseConfig = {
     apiKey: "AIzaSyBMfRunxxEEb-1mWRbDXYQCxFnTLTtD0FE",
@@ -14,7 +15,7 @@ const firebaseConfig = {
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-//firebase.analytics();
+const analytics = firebase.analytics();
 
 const storage = firebase.storage()
 
@@ -23,9 +24,10 @@ const auth = firebase.auth()
 
 if (process.env.NODE_ENV !== 'production') {
     functions.useEmulator("localhost", 5001)
+    auth.useEmulator('http://localhost:9099')
 }
 
 export  {
-    storage, firebaseConfig, functions, auth, firebase as default
+    storage, firebaseConfig, functions, auth, analytics, firebase as default
 }
 

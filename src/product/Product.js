@@ -14,7 +14,7 @@ import {
     useParams,
     Link
 } from "react-router-dom";
-import {functions} from "../firebase";
+import {analytics, functions} from "../firebase";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -74,27 +74,32 @@ const ProductPage = () => {
     });
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('')
     const handleProductNumChange = () => {
         setTotalProductNum(() => {
                 const cart = JSON.parse(window.localStorage.getItem('cart'));
                 return cart.reduce((total, item) => total + parseInt(item.num), 0);
             });
     }
-    let {id} = useParams();
+    const {id} = useParams();
 
 
     useEffect(() => {
         functions.httpsCallable('productDetails')({id: id})
             .then(res => {
-                console.log(res.data)
                 setLoading(false)
-                setProduct(res.data);
+                if (res.data.code === 200) {
+                    setProduct(res.data);
+                } else {
+                    console.log(res.data.message)
+                    setError(res.data.message)
+                }
             })
     // eslint-disable-next-line
     }, [])
 
     const content = (() => {
-        if (loading || product === null) {
+        if ((loading || product === null) && !error) {
             return (
                 <Container className={classes.headline}>
                     <Fade
@@ -105,10 +110,16 @@ const ProductPage = () => {
                         }}
                         unmountOnExit
                     >
-                        <CircularProgress />
+                        <CircularProgress/>
                     </Fade>
                 </Container>
             )
+        } else if (error !== '') {
+            return <Container className={classes.headline}>
+                    <Typography className={classes.center} variant="body1">
+                        Det skjedde en feil: {error}
+                    </Typography>
+                </Container>
         } else {
             return <Product onChange={handleProductNumChange} product={product} />
         }
@@ -239,6 +250,13 @@ const Controls = (props) => {
         const cartJSON = JSON.stringify(cart);
         console.log(cartJSON)
         window.localStorage.setItem('cart', cartJSON);
+        analytics.logEvent('add_to_cart', {
+            item_id: props.id,
+            item_name: props.title,
+            price: props.prices.filter(v => !v.transform)[0].amount/100,
+            currency: 'nok',
+            quantity: num
+        })
         props.onChange();
     }
 

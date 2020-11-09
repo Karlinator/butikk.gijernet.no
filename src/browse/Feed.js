@@ -5,6 +5,7 @@ import {AddShoppingCart, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import { useHistory } from 'react-router-dom';
 import clsx from "clsx";
+import {analytics} from "../firebase";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -81,14 +82,22 @@ const Feed = (props) => {
     const handleAddToCart = (e, id) => {
         e.stopPropagation();
         props.onAddProduct();
+        const product = props.products.find(i => i.id === id)
         let cart = JSON.parse(window.localStorage.getItem('cart'));
         const i = cart.findIndex(p => p.id === id);
         if (i !== -1) {
-            cart[i].num = parseInt(cart[i].num) + 1;
+            cart[i].num = parseInt(cart[i].num)+1;
         } else {
             cart.push({id: id, num: 1});
         }
         setCartList(cart);
+        analytics.logEvent('add_to_cart', {
+            item_id: id,
+            item_name: product.title,
+            price: product.prices.filter(v => !v.transform)[0].amount/100,
+            currency: 'nok',
+            quantity: 1
+        })
         const cartJSON = JSON.stringify(cart);
         console.log(cartJSON)
         window.localStorage.setItem('cart', cartJSON);
