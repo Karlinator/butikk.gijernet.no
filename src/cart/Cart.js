@@ -120,8 +120,9 @@ const Cart = () => {
     const handleCheckout = async () => {
         const stripe = await loadStripe(process.env.REACT_APP_STRIPE_KEY)
         const prices = products.map(v => (calculateBestPrice(v.prices, v.quantity)))
+        console.log(prices)
         setLoadingSubmit(true)
-        analytics.logEvent('begin_checkout', {currency: 'nok', items: products.map(v => ({item_id: v.id, item_list_name: v.title, item_category: v.type, quantity: v.quantity, price: prices.find(i => i.id === v.id).price.amount/100})), value: prices.reduce((t, c) => t+c.amount)/100})
+        analytics.logEvent('begin_checkout', {currency: 'nok', items: products.map(v => ({item_id: v.id, item_list_name: v.title, item_category: v.type, quantity: v.quantity, price: v.prices.filter(i => !i.transform)[0].amount/100})), value: prices.reduce((t, c) => t+c.amount)/100})
         console.log(prices)
         let request = [];
         prices.forEach(v => {
@@ -161,7 +162,7 @@ const Cart = () => {
         console.log(prices)
         console.log(num)
         if (prices.length === 1) {
-            return {...prices[0], packs: 0, singles: num, basePrice: {...prices[0]}}
+            return {price: {...prices[0], packs: 0, singles: num, basePrice: {...prices[0]}}, best: prices[0].amount * num}
         } else {
             let best = null;
             let bestPrice = Infinity;
@@ -278,6 +279,10 @@ const Cart = () => {
 
 const CartList = (props) => {
     const classes = useStyles();
+    const insertThumb = (img) => {
+        const n = img.lastIndexOf('/')
+        return img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
+    }
     return (
         <TableContainer>
             <Table className={classes.table}>
@@ -293,7 +298,7 @@ const CartList = (props) => {
                 <TableBody>
                     {props.products.map((row) => (
                         <TableRow key={row.id}>
-                            <TableCell align="center"><img alt="" className={classes.img} src={row.image}/></TableCell>
+                            <TableCell align="center"><img alt="" className={classes.img} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
                             <TableCell align="center">{row.name}</TableCell>
                             <TableCell align="center">
                                 <TextField
@@ -305,8 +310,8 @@ const CartList = (props) => {
                                     onChange={e => props.onChange(e, row.id)}
                                 />
                             </TableCell>
-                            <TableCell align="center">{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.amount/100}</TableCell>
-                            <TableCell align="center">{(row.price.singles * row.price.basePrice.amount + row.price.packs * row.price.amount)/100}</TableCell>
+                            <TableCell align="center">{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.price.amount/100}</TableCell>
+                            <TableCell align="center">{row.price.best/100}</TableCell>
                             <TableCell align="center">
                                 <IconButton
                                     onClick={e => props.onRemove(e, row.id)}
@@ -323,7 +328,7 @@ const CartList = (props) => {
                     </TableRow>
                     <TableRow>
                         <TableCell align="center">Total:</TableCell>
-                        <TableCell align="center">{props.products.reduce((total, v) => total + (parseInt(v.price.singles) * parseInt(v.price.basePrice.amount) + parseInt(v.price.packs) * parseInt(v.price.amount)), 0)/100}</TableCell>
+                        <TableCell align="center">{props.products.reduce((total, v) => total + v.price.best, 0)/100}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>

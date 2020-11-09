@@ -169,7 +169,7 @@ const Admin = () => {
                                                                 <img
                                                                     alt=""
                                                                     className={classes.imgList}
-                                                                    src={i.uri}
+                                                                    src={i.uri.slice(0, i.uri.lastIndexOf('/')+1)+'thumb_'+i.uri.slice(i.uri.lastIndexOf('/')+1)}
                                                                 />
                                                                 <IconButton
                                                                     onClick={handleRemovePicture(i.uri, v.id)}

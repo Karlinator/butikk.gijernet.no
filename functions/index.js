@@ -7,14 +7,6 @@ const stripe = require('stripe')(functions.config().stripe.key, {
 
 let db;
 
-// Create and Deploy Your First Cloud Functions
-// https://firebase.google.com/docs/functions/write-firebase-functions
-
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
 
 exports.products = functions.region('europe-west1').https.onCall(async (data) => {
     db = db || admin.firestore();
@@ -135,7 +127,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
     return {products: productsWithPrices.map(v => ({
             id: v.id,
             name: v.name,
-            image: v.images[0],
+            images: v.images,
             prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
         })), shipping: 550};
 })
