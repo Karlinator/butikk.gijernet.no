@@ -51,9 +51,6 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: 25,
         marginRight: 40
     },
-    link: {
-        color: 'inherit',
-    },
     headline: {
         flexGrow: 1,
     },
@@ -129,25 +126,23 @@ const ProductPage = () => {
         <div className={classes.bottom}>
             <AppBar position="sticky">
                 <Toolbar>
-                    <Link to="/" className={classes.link}>
-                        <IconButton color="inherit" edge="start" aria-label="tilbake">
-                            <ArrowBack />
-                        </IconButton>
-                    </Link>
+                    <IconButton component={Link} to="/" color="inherit" edge="start" aria-label="tilbake">
+                        <ArrowBack />
+                    </IconButton>
                     <Typography variant="h6" noWrap className={classes.headline}>
                         Gi Jernet Nettbutikk
                     </Typography>
-                    <Link to="/cart" className={classes.link}>
-                        <IconButton
-                            color="inherit"
-                            aria-label="handlevogn"
-                            edge="end"
-                        >
-                            <Badge color="secondary" badgeContent={totalProductNum}>
-                                <ShoppingCart />
-                            </Badge>
-                        </IconButton>
-                    </Link>
+                    <IconButton
+                        component={Link}
+                        to="/cart"
+                        color="inherit"
+                        aria-label="handlevogn"
+                        edge="end"
+                    >
+                        <Badge color="secondary" badgeContent={totalProductNum}>
+                            <ShoppingCart />
+                        </Badge>
+                    </IconButton>
                 </Toolbar>
             </AppBar>
             {content}

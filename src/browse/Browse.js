@@ -75,9 +75,6 @@ const useStyles = makeStyles((theme) => ({
     headline: {
         flexGrow: 1,
     },
-    link: {
-        color: 'inherit',
-    },
     center: {
         marginLeft: '40%',
         marginTop: 50,
@@ -190,17 +187,17 @@ const Browse = () => {
                     <Typography variant="h6" noWrap className={classes.headline}>
                         Gi Jernet Nettbutikk
                     </Typography>
-                    <Link to="/cart" className={classes.link}>
-                        <IconButton
-                            color="inherit"
-                            aria-label="handlevogn"
-                            edge="end"
-                        >
-                            <Badge color="secondary" badgeContent={totalProductNum}>
-                                <ShoppingCart />
-                            </Badge>
-                        </IconButton>
-                    </Link>
+                    <IconButton
+                        component={Link}
+                        to="/cart"
+                        color="inherit"
+                        aria-label="handlevogn"
+                        edge="end"
+                    >
+                        <Badge color="secondary" badgeContent={totalProductNum}>
+                            <ShoppingCart />
+                        </Badge>
+                    </IconButton>
                 </Toolbar>
             </AppBar>
             <Hidden smUp>

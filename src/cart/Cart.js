@@ -44,9 +44,6 @@ const useStyles = makeStyles((theme) => ({
     number: {
         width: 70,
     },
-    link: {
-        color: 'inherit',
-    },
     center: {
         marginLeft: '40%',
         marginTop: 50,
@@ -259,11 +256,9 @@ const Cart = () => {
         <div>
             <AppBar position="sticky">
                 <Toolbar>
-                    <Link to="/" className={classes.link}>
-                        <IconButton color="inherit" edge="start" aria-label="tilbake">
-                            <ArrowBack />
-                        </IconButton>
-                    </Link>
+                    <IconButton component={Link} to="/" color="inherit" edge="start" aria-label="tilbake">
+                        <ArrowBack />
+                    </IconButton>
                 </Toolbar>
             </AppBar>
             <Container className={small ? classes.noPadding : null}>
