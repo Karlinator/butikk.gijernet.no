@@ -112,13 +112,14 @@ const Admin = () => {
     }
 
     useEffect(() => {
-        functions.httpsCallable('products')({descriptions: true})
+        fetch('/api/products?noCache=true')
+            .then(v => v.json())
             .then(v => {
                 // { [productId]: [{file: null, uri: "cloud.storage.whatever/file"}]}
-                setProducts(v.data.products);
-                setTypes(v.data.types)
-                console.log(v.data.products)
-                setPictures(v.data.products.reduce((a, key) => Object.assign(a, { [key.id]: key.images.filter(i => !i.includes('stripe.com')).map(i => ({file: null, uri: i}))}), {}));
+                setProducts(v.products);
+                setTypes(v.types)
+                console.log(v.products)
+                setPictures(v.products.reduce((a, key) => Object.assign(a, { [key.id]: key.images.filter(i => !i.includes('stripe.com')).map(i => ({file: null, uri: i}))}), {}));
                 setLoading(false);
             })
     }, [])

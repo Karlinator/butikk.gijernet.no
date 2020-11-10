@@ -204,12 +204,13 @@ const Cart = () => {
                     }
                 } else {
                     //console.log(v.amount*num)
-                    if (v.amount*num < bestPrice) {
+                    if (v.amount*num <= bestPrice) {
                         best = {...v, packs: 0, singles: num, basePrice: basePrice}
                         bestPrice = v.amount*num
                     }
                 }
             })
+            console.log(best)
             return {price: best, amount: bestPrice};
         }
     }
@@ -347,7 +348,7 @@ const CartList = (props) => {
                         </TableRow>
                         <TableRow>
                             <TableCell align="center">Total:</TableCell>
-                            <TableCell align="center">{props.products.reduce((total, v) => total + v.price.best, 0)/100}</TableCell>
+                            <TableCell align="center">{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
                         </TableRow>
                     </Hidden>
                     <Hidden mdUp>
@@ -357,7 +358,7 @@ const CartList = (props) => {
                         </TableRow>
                         <TableRow>
                             <TableCell align="center">Total:</TableCell>
-                            <TableCell align="center">{props.products.reduce((total, v) => total + v.price.best, 0)/100}</TableCell>
+                            <TableCell align="center">{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
                         </TableRow>
                     </Hidden>
                 </TableBody>
@@ -391,8 +392,8 @@ const CartRowWide = (props) => {
                     onChange={e => props.onChange(e, row.id)}
                 />
             </TableCell>
-            <TableCell align="center">{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.price.amount/100}</TableCell>
-            <TableCell align="center">{row.price.best/100}</TableCell>
+            <TableCell align="center">{row.price.price.transform ? row.price.price.amount/100+" pr "+row.price.price.transform.divide_by : row.price.price.amount/100}</TableCell>
+            <TableCell align="center">{row.price.amount/100}</TableCell>
             <TableCell align="center">
                 <IconButton
                     onClick={e => props.onRemove(e, row.id)}
@@ -428,10 +429,10 @@ const CartRowNarrow = (props) => {
                             onChange={e => props.onChange(e, row.id)}
                         />
                     </TableCell>
-                    <TableCell padding="none" className={classes.noBorder} align="center"><Typography variant="body2">kr{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.price.amount/100 + ' pr stk'}</Typography></TableCell>
+                    <TableCell padding="none" className={classes.noBorder} align="center"><Typography variant="body2">kr{row.price.price.transform ? row.price.price.amount/100+" pr "+row.price.price.transform.divide_by : row.price.price.amount/100 + ' pr stk'}</Typography></TableCell>
                     <TableCell padding="none" className={classes.noBorder} align="center">
                         <Typography variant="body2">
-                            kr{row.price.best/100}
+                            kr{row.price.amount/100}
                             <IconButton
                                 onClick={e => props.onRemove(e, row.id)}
                             >

@@ -143,7 +143,7 @@ const Browse = () => {
                 result => {
                     setProducts(result.products)
                     setFeed(<Feed onAddProduct={handleProductNumChange} products={result.products}/>);
-                    setTypes(result.types)
+                    setTypes(result.types.map(v => v.type))
                     setFilters(result.types.reduce((a, key) => Object.assign(a, {[key]: true}), {}))
                     setLoading(false);
                 },

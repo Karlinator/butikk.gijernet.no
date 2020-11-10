@@ -7,6 +7,8 @@ const stripe = require('stripe')(functions.config().stripe.key, {
 
 let db;
 
+const cache = 'public, max-age=300, s-maxage=600'
+
 
 exports.products = functions.https.onRequest(async (req, resp) => {
     db = db || admin.firestore();
@@ -18,38 +20,39 @@ exports.products = functions.https.onRequest(async (req, resp) => {
     let productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
     let types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
-    if (req.query.descriptions) {
-        productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
-            const productDesc = await db.collection('products').doc(p.id).get()
-            //console.log(productDesc)
-            let description;
-            //console.log(p.name, productDesc.data())
-            try {
-                description = productDesc.data().description
-            } catch {
-                description = ''
-            }
-            return {...p, longDescription: description}
+    productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
+        const productDesc = await db.collection('products').doc(p.id).get()
+        //console.log(productDesc)
+        let description;
+        //console.log(p.name, productDesc.data())
+        try {
+            description = productDesc.data().description
+        } catch {
+            description = ''
+        }
+        return {...p, longDescription: description}
 
-        }))
-        types = await Promise.all(types.map(async v => {
-            const typeDesc = await db.collection('types').doc(v).get()
-            //console.log(productDesc)
-            let description;
-            //console.log(p.name, productDesc.data())
-            try {
-                description = typeDesc.data().description
-            } catch {
-                description = ''
-            }
-            return {type: v, description: description}
-        }))
+    }))
+    types = await Promise.all(types.map(async v => {
+        const typeDesc = await db.collection('types').doc(v).get()
+        //console.log(productDesc)
+        let description;
+        //console.log(p.name, productDesc.data())
+        try {
+            description = typeDesc.data().description
+        } catch {
+            description = ''
+        }
+        return {type: v, description: description}
+    }))
+    if (req.query.noCache) {
+        resp.header('Cache-Control', 'no-store')
+    } else {
+        resp.header('Cache-Control', cache)
     }
 
     //prices.data.forEach(v => console.log(v.product.images));
     //console.log(productsWithPrices)
-
-    resp.header('Cache-Control', 'public, max-age=300, s-maxage=600')
     resp.send ({
         products: productsWithPrices.map(v => ({
             id: v.id,
@@ -93,7 +96,7 @@ exports.productDetails = functions.https.onRequest(async (req, resp) => {
         typeDesc = ''
     }
 
-    resp.header('Cache-Control', 'public, max-age=300, s-maxage=600')
+    resp.header('Cache-Control', cache)
     resp.status(200).send({
         id: product.id,
         description: product.description,
@@ -119,18 +122,18 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
     const products = await Promise.all(productList.map(v => stripe.products.retrieve(v)))
     const productsWithPrices = products.map(v => ({...v, prices: prices.find(p => p.data[0].product === v.id)}))
 
-    console.log(productsWithPrices)
-
     return {products: productsWithPrices.map(v => ({
             id: v.id,
             name: v.name,
             images: v.images,
             prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
             description: v.description,
-        })), shipping: 550};
+        })), shipping: 40};
 })
 
 exports.checkout = functions.region('europe-west1').https.onCall(async (data) => {
+    data.push({price_data: {currency: 'nok', product_data: {name: 'Frakt'}, unit_amount: 4000}, quantity: 1})
+    console.log(data)
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: data,
