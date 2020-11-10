@@ -204,12 +204,22 @@ const Product = (props) => {
             <Container>
                 <Typography variant="h3" component="h1">{props.product.name}</Typography>
                 <Typography variant="h5" component="h3">{props.product.description}</Typography>
-                <Typography variant="h4" component="h2">kr {props.product.price.amount/100}</Typography>
+                <Typography variant="h4" component="h2">
+                    kr {props.product.prices.filter(v => !v.transform)[0].amount/100}
+                    {props.product.prices.length > 1
+                        ?
+                            ', kr '
+                            + props.product.prices.filter(v => v.transform)[0].amount/100
+                            + ' for '
+                            + props.product.prices.filter(v => v.transform)[0].transform.divide_by
+                        : ''
+                    }
+                </Typography>
             </Container>
             <Grid container spacing={3}>
                 <Hidden mdUp>
                     <Grid item xs={12}>
-                        <Controls onChange={props.onChange} id={props.product.price.id} />
+                        <Controls onChange={props.onChange} id={props.product.id} />
                     </Grid>
                 </Hidden>
                 <Grid item xs={12} md={8}>

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import {Container, TextField, FormGroup, FormLabel, FormControlLabel, Checkbox} from '@material-ui/core';
 
 const Controls = (props) => {

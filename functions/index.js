@@ -101,10 +101,7 @@ exports.productDetails = functions.region('europe-west1').https.onCall(async (da
         name: product.name,
         images: product.images,
         unit_label: product.unit_label,
-        price: {
-            id: prices.data[0].id,
-            amount: prices.data[0].unit_amount,
-        },
+        prices: prices.data.map(v => ({id: v.id, amount: v.unit_amount, transform: v.transform_quantity})),
         type: product.metadata.type,
         type_description: typeDesc,
     });
