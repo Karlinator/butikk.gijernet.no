@@ -71,6 +71,8 @@ const Admin = () => {
         setTypes(t => t.map(v => v.type === type ? ({...v, description: e.target.value, changed: true}) : v))
     }
 
+    const handleKeyDown = (e) => e.keyCode === 13 ? handleSignIn() : null
+
     const handleCredentialsChange = (prop) => (e) => setCredentials(c => ({...c, [prop]: e.target.value}))
 
     const handleSignIn = () => {
@@ -245,6 +247,7 @@ const Admin = () => {
                                         onChange={handleCredentialsChange('username')}
                                         label="Brukernavn"
                                         variant="filled"
+                                        onKeyDown={handleKeyDown}
                                     />
                                 </div>
                                 <div>
@@ -254,6 +257,7 @@ const Admin = () => {
                                         label="Passord"
                                         type="password"
                                         variant="filled"
+                                        onKeyDown={handleKeyDown}
                                     />
                                 </div>
                                 <Button
