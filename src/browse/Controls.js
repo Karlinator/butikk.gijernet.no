@@ -5,6 +5,7 @@ const Controls = (props) => {
     return(
         <Container>
             <TextField variant='filled' label="Søk" value={props.search} onChange={props.handleSearch} />
+            <br/><br/>
             <FormLabel component="legend">Velg produkttyper</FormLabel>
             <FormGroup>
                 {props.types.map(v => (
