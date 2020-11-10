@@ -180,7 +180,7 @@ const Cart = () => {
         console.log(prices)
         console.log(num)
         if (prices.length === 1) {
-            return {price: {...prices[0], packs: 0, singles: num, basePrice: {...prices[0]}}, best: prices[0].amount * num}
+            return {price: {...prices[0], packs: 0, singles: num, basePrice: {...prices[0]}}, amount: prices[0].amount * num}
         } else {
             let best = null;
             let bestPrice = Infinity;
