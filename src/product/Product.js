@@ -186,7 +186,7 @@ const Product = (props) => {
             <Container>
                 <img className={classes.coverImg} alt={props.product.title} src={selected} />
             </Container>
-            {props.product.images.length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={props.product.images.length - 1}>
+            {props.product.images.filter(i => !i.includes('stripe.com')).length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={props.product.images.length - 1}>
                 {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => {
                     const n = img.lastIndexOf('/')
                     const thumb = img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
