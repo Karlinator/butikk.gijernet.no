@@ -1,4 +1,4 @@
-import React from "react";
+import React, {lazy, Suspense} from "react";
 import {
     BrowserRouter as Router,
     Switch,
@@ -7,10 +7,11 @@ import {
 import ProductPage from "./product/Product";
 import Cart from "./cart/Cart";
 import Browse from "./browse/Browse";
-import Admin from "./admin/Admin";
 import {analytics} from "./firebase";
 import CookieKit from 'react-cookie-kit'
 import 'react-cookie-kit/dist/xck-react-theme-popup.css'
+import {CircularProgress, Fade} from "@material-ui/core";
+const Admin = lazy(() => import("./admin/Admin"));
 
 function App() {
     if (!window.localStorage.getItem('cart') || JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('price'))) {
@@ -34,7 +35,23 @@ function App() {
                         <Cart />
                     </Route>
                     <Route path="/admin">
-                        <Admin />
+                        <Suspense fallback={
+                            <div style={{flexGrow: 1}}>
+                                <Fade
+                                    in
+                                    style={{
+                                        transitionDelay: '800ms',
+                                        marginLeft: '40%',
+                                        marginTop: 50,
+                                    }}
+                                    unmountOnExit
+                                >
+                                    <CircularProgress />
+                                </Fade>
+                            </div>
+                        }>
+                            <Admin />
+                        </Suspense>
                     </Route>
                     <Route path="/:id" children={<ProductPage />}/>
                     <Route path="/">

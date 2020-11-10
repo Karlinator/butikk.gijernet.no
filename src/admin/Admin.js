@@ -6,7 +6,6 @@ import {
     TableRow,
     TableBody,
     TableCell,
-    Fade,
     TextField,
     CircularProgress, Container, Button, IconButton, Typography
 } from "@material-ui/core";
@@ -162,16 +161,7 @@ const Admin = () => {
     if (loading) {
         return (
             <Container className={classes.headline}>
-                <Fade
-                    in={loading}
-                    className={classes.center}
-                    style={{
-                        transitionDelay: loading ? '800ms' : '0ms',
-                    }}
-                    unmountOnExit
-                >
-                    <CircularProgress />
-                </Fade>
+                <CircularProgress className={classes.center} />
             </Container>
         )
     }
