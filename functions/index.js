@@ -8,7 +8,7 @@ const stripe = require('stripe')(functions.config().stripe.key, {
 let db;
 
 
-exports.products = functions.region('europe-west1').https.onCall(async (data) => {
+exports.products = functions.https.onRequest(async (req, resp) => {
     db = db || admin.firestore();
 
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
@@ -18,7 +18,7 @@ exports.products = functions.region('europe-west1').https.onCall(async (data) =>
     let productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
     let types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
-    if (data.descriptions) {
+    if (req.query.descriptions) {
         productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
             const productDesc = await db.collection('products').doc(p.id).get()
             //console.log(productDesc)
@@ -49,7 +49,8 @@ exports.products = functions.region('europe-west1').https.onCall(async (data) =>
     //prices.data.forEach(v => console.log(v.product.images));
     //console.log(productsWithPrices)
 
-    return ({
+    resp.header('Cache-Control', 'public, max-age=300, s-maxage=600')
+    resp.send ({
         products: productsWithPrices.map(v => ({
             id: v.id,
             title: v.name,
@@ -64,20 +65,20 @@ exports.products = functions.region('europe-west1').https.onCall(async (data) =>
 })
 
 
-exports.productDetails = functions.region('europe-west1').https.onCall(async (data) => {
+exports.productDetails = functions.https.onRequest(async (req, resp) => {
     db = db || admin.firestore();
 
     let product
 
     try {
-        product = await stripe.products.retrieve(data.id.toString())
+        product = await stripe.products.retrieve(req.query.id.toString())
     } catch (e) {
-        return {message: e.message, code: e.statusCode}
+        resp.status(e.statusCode).send(e.message)
     }
 
     const productDescDoc = await db.collection('products').doc(product.id).get()
     const typeDescDoc = await db.collection('types').doc(product.metadata.type).get()
-    const prices = await stripe.prices.list({product: data.id.toString()})
+    const prices = await stripe.prices.list({product: req.query.id.toString()})
 
     let productDesc;
     try {
@@ -92,9 +93,8 @@ exports.productDetails = functions.region('europe-west1').https.onCall(async (da
         typeDesc = ''
     }
 
-
-    return ({
-        code: 200,
+    resp.header('Cache-Control', 'public, max-age=300, s-maxage=600')
+    resp.status(200).send({
         id: product.id,
         description: product.description,
         longDescription: productDesc,

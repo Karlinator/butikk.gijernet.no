@@ -14,7 +14,7 @@ import {
     useParams,
     Link
 } from "react-router-dom";
-import {analytics, functions} from "../firebase";
+import {analytics} from "../firebase";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -85,16 +85,16 @@ const ProductPage = () => {
 
 
     useEffect(() => {
-        functions.httpsCallable('productDetails')({id: id})
+        fetch('/api/productDetails?id='+id)
+            .then(res => res.json())
             .then(res => {
                 setLoading(false)
-                if (res.data.code === 200) {
-                    setProduct(res.data);
-                } else {
-                    console.log(res.data.message)
-                    setError(res.data.message)
-                }
+                setProduct(res)
             })
+            .catch((res) => {
+                console.log(res)
+                setError(res.message)
+                })
     // eslint-disable-next-line
     }, [])
 

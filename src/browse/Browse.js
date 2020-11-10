@@ -19,7 +19,6 @@ import {
 } from "@material-ui/core";
 import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
-import {functions} from "../firebase";
 
 const drawerWidth = 240;
 
@@ -116,7 +115,7 @@ const Browse = () => {
 
     }
     const handleSearch = (e) => {
-        setSearch(s => e.target.value)
+        setSearch(e.target.value)
         setFeed(<Feed
             onAddProduct={handleProductNumChange}
             products={products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(e.target.value.toLowerCase()))}
@@ -138,13 +137,14 @@ const Browse = () => {
         </Container>);
 
     useEffect(() => {
-        functions.httpsCallable('products')({descriptions: false})
+        fetch('/api/products/')
+            .then(res => res.json())
             .then(
                 result => {
-                    setProducts(result.data.products)
-                    setFeed(<Feed onAddProduct={handleProductNumChange} products={result.data.products}/>);
-                    setTypes(result.data.types)
-                    setFilters(result.data.types.reduce((a, key) => Object.assign(a, {[key]: true}), {}))
+                    setProducts(result.products)
+                    setFeed(<Feed onAddProduct={handleProductNumChange} products={result.products}/>);
+                    setTypes(result.types)
+                    setFilters(result.types.reduce((a, key) => Object.assign(a, {[key]: true}), {}))
                     setLoading(false);
                 },
                 (error) => {
