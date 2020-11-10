@@ -49,26 +49,58 @@ const Admin = () => {
     const [pictures, setPictures] = useState({})
     const [types, setTypes] = useState(null)
     const [waiting, setWaiting] = useState(false)
+    const [indexes, setIndexes] = useState()
 
-    const handleAddPicture = (id) => (event) => {
+    // NOTE: All 4 handlers intentionally do not cause a re-render.
+    // This is done to save rendering time, and prevent all components from re-rendering
+    // Instead, the displayed values in each component is stored and updated locally, and then collected here by these.
+    const handleAddPicture = (id, files) => {
         // event.target.files[0] is the file that was added.
         // URL.CreateObjectURL is user to allow local preview before upload.
         // The file attribute is what will actually be uploaded to the server.
-        setPictures({...pictures, [id]: [...pictures[id], {file: event.target.files[0], uri: URL.createObjectURL(event.target.files[0])}]})
-        setProducts(products.map(p => p.id === id ? ({...p, changed: true}) : p))
+        setPictures(p => {
+            p[id] = [...p[id], {file: files[0], uri: URL.createObjectURL(files[0])}]
+            return p
+        })
+        setProducts(p => {
+            p[indexes.products[id]] = {...p[indexes.products[id]], changed: true}
+            return p
+        })
     }
 
-    const handleRemovePicture = (uri, id) => () => {
-        setPictures({...pictures, [id]: [...pictures[id].filter(i => i.uri !== uri)]});
-        setProducts(products.map(p => p.id === id ? ({...p, images: p.images.filter(i => i !== uri), changed: true}) : p))
+    const handleRemovePicture = (uri, id) => {
+        setPictures(p => {
+            p[id] = p[id].filter(i => i.uri !== uri)
+            return p
+        });
+        setProducts(p => {
+            //console.log('removing from', p, 'at position', indexes.products[id], 'indexes: ', indexes)
+            p[indexes.products[id]] = {...p[indexes.products[id]], images: p[indexes.products[id]].images.filter(i => i !== uri), changed: true}
+            //console.log(p[indexes.products[id]])
+            return p
+        })
     }
 
-    const handleDescriptionChange = (id) => (e) => {
-        setProducts(products.map(p => p.id === id ? ({...p, longDescription: e.target.value, changed: true}) : p))
+    const handleDescriptionChange = (id, value) => {
+        //setProducts(products.map(p => p.id === id ? ({...p, longDescription: value, changed: true}) : p))
+        setProducts(t => {
+            console.log(t)
+            console.log(indexes)
+            t[indexes.products[id]] = {...t[indexes.products[id]], longDescription: value, changed: true}
+            console.log([...t])
+            return t
+        })
     }
 
     const handleTypesDescriptionChange = (type) => (e) => {
-        setTypes(t => t.map(v => v.type === type ? ({...v, description: e.target.value, changed: true}) : v))
+        //setTypes(t => t.map(v => v.type === type ? ({...v, description: e.target.value, changed: true}) : v))
+        setTypes(t => {
+            //console.log(t)
+            //console.log(indexes)
+            t[indexes.types[type]] = {...t[indexes.types[type]], description: e.target.value, changed: true}
+            //console.log([...t])
+            return t
+        })
     }
 
     const handleKeyDown = (e) => e.keyCode === 13 ? handleSignIn() : null
@@ -118,6 +150,10 @@ const Admin = () => {
                 // { [productId]: [{file: null, uri: "cloud.storage.whatever/file"}]}
                 setProducts(v.products);
                 setTypes(v.types)
+                console.log(v.types)
+                const i = {types: v.types.reduce((a, key, i) => ({...a, [key.type]: i}), {}), products: v.products.reduce((a, key, i) => ({...a, [key.id]: i}), {})}
+                setIndexes(i)
+                console.log(i)
                 console.log(v.products)
                 setPictures(v.products.reduce((a, key) => Object.assign(a, { [key.id]: key.images.filter(i => !i.includes('stripe.com')).map(i => ({file: null, uri: i}))}), {}));
                 setLoading(false);
@@ -163,67 +199,20 @@ const Admin = () => {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {products.map(v => (
-                                                <TableRow key={v.id}>
-                                                    <TableCell>{v.title}</TableCell>
-                                                    <TableCell>
-                                                        {pictures[v.id].map(i => (
-                                                            <div>
-                                                                <img
-                                                                    alt=""
-                                                                    className={classes.imgList}
-                                                                    src={i.uri.slice(0, i.uri.lastIndexOf('/')+1)+'thumb_'+i.uri.slice(i.uri.lastIndexOf('/')+1)}
-                                                                />
-                                                                <IconButton
-                                                                    onClick={handleRemovePicture(i.uri, v.id)}
-                                                                >
-                                                                    <Delete />
-                                                                </IconButton>
-                                                            </div>
-                                                        ))}
-                                                        <Button
-                                                            variant="contained"
-                                                            component="label"
-                                                            startIcon={<Image/>}
-                                                        >
-                                                            Nytt bilde
-                                                            <input
-                                                                type="file"
-                                                                style={{display: 'none'}}
-                                                                onChange={handleAddPicture(v.id)}
-                                                                accept="image/jpg image/png"
-                                                                multiple
-                                                            />
-                                                        </Button>
-                                                    </TableCell>
-                                                    <TableCell align="center">
-                                                        <TextField
-                                                            variant="filled"
-                                                            multiline
-                                                            value={v.longDescription}
-                                                            onChange={handleDescriptionChange(v.id)}
-                                                            className={classes.description}
-                                                        />
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                            <TableRow>
+                                            {products.map(v =>
+                                                <ProductRow
+                                                    v={v}
+                                                    key={v.id}
+                                                    onChange={handleDescriptionChange}
+                                                    onAddPicture={handleAddPicture}
+                                                    onRemovePicture={handleRemovePicture}
+                                                    pictures={pictures[v.id]}
+                                                />)}
+                                            <TableRow key="separator">
                                                 <TableCell align="center" colSpan={3}><Typography variant="h2">Typer</Typography></TableCell>
                                             </TableRow>
-                                            {types.map(v => (
-                                                <TableRow key={v.type}>
-                                                    <TableCell>{v.type}</TableCell>
-                                                    <TableCell colSpan={2}>
-                                                        <TextField
-                                                            variant="filled"
-                                                            multiline
-                                                            value={v.description}
-                                                            onChange={handleTypesDescriptionChange(v.type)}
-                                                            className={classes.description}
-                                                        />
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
+                                            {types.map(v =>
+                                                <TypeRow key={v.id} v={v} onChange={handleTypesDescriptionChange}/>)}
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
@@ -275,6 +264,87 @@ const Admin = () => {
             </FirebaseAuthConsumer>
 
         </FirebaseAuthProvider>
+    )
+}
+
+const ProductRow = ({v, onRemovePicture, onAddPicture, onChange, pictures}) => {
+    console.log(pictures)
+    const classes = useStyles()
+    const [description, setDescription] = useState(v.longDescription)
+    const [pics, setPics] = useState(pictures)
+    const handleChange = (id) => (e) => {
+        onChange(id, e.target.value)
+        setDescription(e.target.value)
+    }
+    const handleAddPicture = (id) => (e) => {
+        onAddPicture(id, e.target.files)
+        setPics(p => [...p, {file: e.target.files[0], uri: URL.createObjectURL(e.target.files[0])}])
+    }
+    const handleRemovePicture = (uri, id) => () => {
+        onRemovePicture(uri, id)
+        setPics(p => [...p.filter(i => i.uri !== uri)])
+    }
+    return (
+        <TableRow>
+            <TableCell>{v.title}</TableCell>
+            <TableCell>
+                {pics.map(i => (
+                    <div key={i.uri}>
+                        <img
+                            alt=""
+                            className={classes.imgList}
+                            src={!i.uri.includes('blob:') ? i.uri.slice(0, i.uri.lastIndexOf('/')+1)+'thumb_'+i.uri.slice(i.uri.lastIndexOf('/')+1): i.uri}
+                        />
+                        <IconButton
+                            onClick={handleRemovePicture(i.uri, v.id)}
+                        >
+                            <Delete />
+                        </IconButton>
+                    </div>
+                ))}
+                <Button
+                    variant="contained"
+                    component="label"
+                    startIcon={<Image/>}
+                >
+                    Nytt bilde
+                    <input
+                        type="file"
+                        style={{display: 'none'}}
+                        onChange={handleAddPicture(v.id)}
+                        accept="image/jpg image/png"
+                        multiple
+                    />
+                </Button>
+            </TableCell>
+            <TableCell align="center">
+                <TextField
+                    variant="filled"
+                    multiline
+                    value={description}
+                    onChange={handleChange(v.id)}
+                    className={classes.description}
+                />
+            </TableCell>
+        </TableRow>
+    )
+}
+
+const TypeRow = ({v, onChange}) => {
+    const classes = useStyles()
+    return (
+        <TableRow>
+            <TableCell>{v.type}</TableCell>
+            <TableCell colSpan={2}>
+                <TextField
+                    variant="filled"
+                    multiline
+                    value={v.description}
+                    onChange={onChange(v.type)}
+                    className={classes.description}
+                />
+            </TableCell>
+        </TableRow>
     )
 }
 
