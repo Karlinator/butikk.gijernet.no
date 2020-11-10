@@ -158,7 +158,22 @@ const Cart = () => {
             return;
         }
 
-        const response = await functions.httpsCallable('checkout')(request);
+        let response
+
+        try {
+
+            response = await functions.httpsCallable('checkout')(request);
+        } catch (error) {
+            console.log(error)
+            setModalTitle("Det skjedde en feil! Serveren sier: " + error.message);
+            setModalContent("Du kan prøve igjen! Hvis du får samme feilen flere ganger så ta gjerne kontakt.")
+            setModalOpen(true);
+            setLoadingSubmit(false)
+            return
+        }
+
+
+        console.log(response)
 
 
         const result = await stripe.redirectToCheckout({

@@ -134,6 +134,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
 exports.checkout = functions.region('europe-west1').https.onCall(async (data) => {
     data.push({price_data: {currency: 'nok', product_data: {name: 'Frakt'}, unit_amount: 4000}, quantity: 1})
     console.log(data)
+    try {
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: data,
@@ -145,10 +146,10 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
             allowed_countries: ['NO']
         }
     })
-    try {
         return {id: session.id}
-    } catch {
-        return {message: session}
+    } catch (error) {
+        console.error(error)
+        return Promise.reject(error)
     }
 })
 
