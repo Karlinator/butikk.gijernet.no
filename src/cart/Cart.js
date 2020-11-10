@@ -133,11 +133,17 @@ const Cart = () => {
     }
 
     const handleCheckout = async () => {
+        if (products.length === 0) {
+            setModalTitle("Du kan ikke kjøpe ingenting!");
+            setModalContent("Eller, du kan det, men da får du ikke betale")
+            setModalOpen(true);
+            return;
+        }
         const stripe = await loadStripe(process.env.REACT_APP_STRIPE_KEY)
         const prices = products.map(v => (calculateBestPrice(v.prices, v.quantity)))
         console.log(prices)
         setLoadingSubmit(true)
-        analytics.logEvent('begin_checkout', {currency: 'nok', items: products.map(v => ({item_id: v.id, item_list_name: v.title, item_category: v.type, quantity: v.quantity, price: v.prices.filter(i => !i.transform)[0].amount/100})), value: prices.reduce((t, c) => t+c.amount)/100})
+        analytics.logEvent('begin_checkout', {currency: 'nok', items: products.map(v => ({item_id: v.id, item_list_name: v.title, item_category: v.type, quantity: v.quantity, price: v.prices.filter(i => !i.transform)[0].amount/100})), value: prices.reduce((t, c) => t+c.amount, 0)/100})
         console.log(prices)
         let request = [];
         prices.forEach(v => {
@@ -234,7 +240,7 @@ const Cart = () => {
         functions.httpsCallable('cartDetails')({productList: productList})
             .then(result => {
                 const list = result.data.products.map(v => ({...v, quantity: cartList.find(c => c.id === v.id).num}))
-                analytics.logEvent('view_cart', {items: result.data.products.map(v => v.id), currency: 'nok', value: list.reduce((total, current) => total + calculateBestPrice(current.prices, current.quantity).amount)})
+                analytics.logEvent('view_cart', {items: result.data.products.map(v => v.id), currency: 'nok', value: list.reduce((total, current) => total + calculateBestPrice(current.prices, current.quantity).amount, 0)})
                 setLoading(false);
                 console.log(result.data)
                 setProducts(list);
