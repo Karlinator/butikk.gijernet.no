@@ -129,6 +129,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
             name: v.name,
             images: v.images,
             prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
+            description: v.description,
         })), shipping: 550};
 })
 

@@ -15,20 +15,31 @@ import {
     Button,
     Fade,
     CircularProgress,
-    Modal,
+    Modal, useTheme, useMediaQuery, Hidden, Typography, Grid,
 } from "@material-ui/core";
 import {ArrowBack, RemoveShoppingCart} from "@material-ui/icons";
 import { green } from '@material-ui/core/colors';
 import {Link} from "react-router-dom";
 import { loadStripe } from '@stripe/stripe-js';
 import {analytics, functions} from "../firebase";
+import clsx from 'clsx'
 
 const useStyles = makeStyles((theme) => ({
     table: {
-        minWidth: 650,
+        minWidth: 200,
     },
     img: {
         maxHeight: 100,
+    },
+    smallImg: {
+        maxHeight: 80,
+    },
+    noBorder: {
+        borderBottom: 'none',
+    },
+    noPadding: {
+        paddingLeft: 0,
+        paddingRight: 0,
     },
     number: {
         width: 70,
@@ -41,8 +52,12 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 50,
     },
     order: {
-        float: 'right',
+        justifyContent: 'center',
+        width: 250,
         marginTop: 20,
+    },
+    back: {
+        flexGrow: 1,
     },
     paper: {
         position: 'absolute',
@@ -99,6 +114,9 @@ const Cart = () => {
     const handleClose = () => {
         setModalOpen(false);
     }
+
+    const theme = useTheme()
+    const small = useMediaQuery(theme.breakpoints.down('sm'))
 
 
     const handleCartNumChange = (e, id) => {
@@ -247,18 +265,33 @@ const Cart = () => {
                     </Link>
                 </Toolbar>
             </AppBar>
-            <Container>
-                {cart}
-                <Button
-                    onClick={handleCheckout}
-                    className={classes.order}
-                    variant="contained"
-                    color="primary"
-                    disabled={loadingSubmit}
-                >
-                    Kjøp
-                    {loadingSubmit && <CircularProgress size={24} className={classes.buttonProgress} />}
-                </Button>
+            <Container className={small ? classes.noPadding : null}>
+                <div>{cart}</div>
+                <Grid justify={small ? 'center' : 'space-between'} container>
+                    <Grid item>
+                        <Button
+                            className={clsx(classes.order, classes.back)}
+                            variant="contained"
+                            color="default"
+                            component={Link}
+                            to="/"
+                        >
+                            Fortsett å handle
+                        </Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            onClick={handleCheckout}
+                            className={classes.order}
+                            variant="contained"
+                            color="primary"
+                            disabled={loadingSubmit}
+                        >
+                            Gå til kassen
+                            {loadingSubmit && <CircularProgress size={24} className={classes.buttonProgress} />}
+                        </Button>
+                    </Grid>
+                </Grid>
             </Container>
             <Modal
                 open={modalOpen}
@@ -279,14 +312,13 @@ const Cart = () => {
 
 const CartList = (props) => {
     const classes = useStyles();
-    const insertThumb = (img) => {
-        const n = img.lastIndexOf('/')
-        return img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
-    }
+    const theme = useTheme()
+    const small = useMediaQuery(theme.breakpoints.down('sm'))
+
     return (
         <TableContainer>
-            <Table className={classes.table}>
-                <TableHead>
+            <Table size={small ? 'small' : 'medium'} className={small ? clsx(classes.table, classes.noPadding) : classes.table}>
+                <Hidden smDown><TableHead>
                     <TableRow>
                         <TableCell colSpan={2} align="center">Produkt</TableCell>
                         <TableCell align="center">Antall</TableCell>
@@ -294,45 +326,122 @@ const CartList = (props) => {
                         <TableCell align="center">Pris</TableCell>
                         <TableCell align="center">Fjern</TableCell>
                     </TableRow>
-                </TableHead>
+                </TableHead></Hidden>
+                <Hidden mdUp><TableHead>
+                    <TableRow>
+                        <TableCell colSpan={2} align="center"><Typography variant="subtitle1">Handlevogn</Typography></TableCell>
+                    </TableRow>
+                </TableHead></Hidden>
                 <TableBody>
                     {props.products.map((row) => (
                         <TableRow key={row.id}>
-                            <TableCell align="center"><img alt="" className={classes.img} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
-                            <TableCell align="center">{row.name}</TableCell>
-                            <TableCell align="center">
-                                <TextField
-                                    className={classes.number}
-                                    variant="outlined"
-                                    type="number"
-                                    size="small"
-                                    value={row.quantity}
-                                    onChange={e => props.onChange(e, row.id)}
-                                />
-                            </TableCell>
-                            <TableCell align="center">{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.price.amount/100}</TableCell>
-                            <TableCell align="center">{row.price.best/100}</TableCell>
-                            <TableCell align="center">
-                                <IconButton
-                                    onClick={e => props.onRemove(e, row.id)}
-                                >
-                                    <RemoveShoppingCart />
-                                </IconButton>
-                            </TableCell>
+                            <Hidden smDown><CartRowWide row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
+                            <Hidden mdUp><CartRowNarrow row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
                         </TableRow>
                     ))}
-                    <TableRow>
-                        <TableCell rowSpan={3} colSpan={3} />
-                        <TableCell align="center">Frakt:</TableCell>
-                        <TableCell align="center">{props.shipping}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell align="center">Total:</TableCell>
-                        <TableCell align="center">{props.products.reduce((total, v) => total + v.price.best, 0)/100}</TableCell>
-                    </TableRow>
+                    <Hidden smDown>
+                        <TableRow>
+                            <TableCell rowSpan={3} colSpan={3} />
+                            <TableCell align="center">Frakt:</TableCell>
+                            <TableCell align="center">{props.shipping}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell align="center">Total:</TableCell>
+                            <TableCell align="center">{props.products.reduce((total, v) => total + v.price.best, 0)/100}</TableCell>
+                        </TableRow>
+                    </Hidden>
+                    <Hidden mdUp>
+                        <TableRow>
+                            <TableCell align="center">Frakt:</TableCell>
+                            <TableCell align="center">{props.shipping}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell align="center">Total:</TableCell>
+                            <TableCell align="center">{props.products.reduce((total, v) => total + v.price.best, 0)/100}</TableCell>
+                        </TableRow>
+                    </Hidden>
                 </TableBody>
             </Table>
         </TableContainer>
+    )
+}
+
+const insertThumb = (img) => {
+    const n = img.lastIndexOf('/')
+    return img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
+}
+
+const CartRowWide = (props) => {
+    const row = props.row
+    const classes = useStyles();
+    return (
+        <>
+            <TableCell align="center"><img alt="" className={classes.img} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
+            <TableCell align="center">
+                <Typography variant="body1">{row.name}</Typography>
+                <Typography variant="body2">{row.description}</Typography>
+            </TableCell>
+            <TableCell align="center">
+                <TextField
+                    className={classes.number}
+                    variant="outlined"
+                    type="number"
+                    size="small"
+                    value={row.quantity}
+                    onChange={e => props.onChange(e, row.id)}
+                />
+            </TableCell>
+            <TableCell align="center">{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.price.amount/100}</TableCell>
+            <TableCell align="center">{row.price.best/100}</TableCell>
+            <TableCell align="center">
+                <IconButton
+                    onClick={e => props.onRemove(e, row.id)}
+                >
+                    <RemoveShoppingCart />
+                </IconButton>
+            </TableCell>
+        </>
+    )
+}
+
+const CartRowNarrow = (props) => {
+    const classes = useStyles()
+    const row = props.row
+    return (
+        <>
+            <TableCell className={classes.noPadding} colSpan={4}>
+                <TableRow>
+                    <TableCell padding="none" className={classes.noBorder} align="center"><img alt="" className={classes.smallImg} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
+                    <TableCell padding="none" colSpan={3} className={classes.noBorder} align="center">
+                        <Typography variant="body1">{row.name}</Typography>
+                        <Typography variant="body2">{row.description}</Typography>
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell padding="none" width={50} className={classes.noBorder} align="center">
+                        <TextField
+                            className={classes.number}
+                            variant="outlined"
+                            type="number"
+                            size="small"
+                            value={row.quantity}
+                            onChange={e => props.onChange(e, row.id)}
+                        />
+                    </TableCell>
+                    <TableCell padding="none" className={classes.noBorder} align="center"><Typography variant="body2">kr{row.price.transform ? row.price.amount/100+" pr "+row.price.transform.divide_by : row.price.price.amount/100 + ' pr stk'}</Typography></TableCell>
+                    <TableCell padding="none" className={classes.noBorder} align="center">
+                        <Typography variant="body2">
+                            kr{row.price.best/100}
+                            <IconButton
+                                onClick={e => props.onRemove(e, row.id)}
+                            >
+                                <RemoveShoppingCart />
+                            </IconButton>
+                        </Typography>
+                    </TableCell>
+                </TableRow>
+            </TableCell>
+        </>
     )
 }
 
