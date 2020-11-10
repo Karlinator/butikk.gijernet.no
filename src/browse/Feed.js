@@ -6,6 +6,8 @@ import {Link} from "react-router-dom";
 import { useHistory } from 'react-router-dom';
 import clsx from "clsx";
 import {analytics} from "../firebase";
+import { LazyLoadImage, trackWindowScroll } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/opacity.css';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -41,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const Feed = (props) => {
+const Feed = ({products, onAddProduct, scrollPosition}) => {
     const classes = useStyles();
     const history = useHistory();
     const [cartList, setCartList] = useState(JSON.parse(window.localStorage.getItem('cart')));
@@ -81,8 +83,8 @@ const Feed = (props) => {
 
     const handleAddToCart = (e, id) => {
         e.stopPropagation();
-        props.onAddProduct();
-        const product = props.products.find(i => i.id === id)
+        onAddProduct();
+        const product = products.find(i => i.id === id)
         let cart = JSON.parse(window.localStorage.getItem('cart'));
         const i = cart.findIndex(p => p.id === id);
         if (i !== -1) {
@@ -106,10 +108,12 @@ const Feed = (props) => {
 
     return (
         <GridList cols={getGridListCols()} spacing={16} className={classes.gridList}>
-            {props.products.map((tile) => (
+            {products.map((tile) => (
                 <GridListTile className={classes.tile} key={tile.id} rows={1.3}>
                     <Link to={'/'+tile.id}>
-                        <img
+                        <LazyLoadImage
+                            effect="opacity"
+                            scrollPosition={scrollPosition}
                             className={classes.img}
                             src={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {
                                 const n = i.lastIndexOf('/')
@@ -142,4 +146,4 @@ const Feed = (props) => {
     )
 }
 
-export default Feed;
+export default trackWindowScroll(Feed);
