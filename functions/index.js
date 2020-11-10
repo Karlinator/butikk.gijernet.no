@@ -59,7 +59,7 @@ exports.products = functions.https.onRequest(async (req, resp) => {
             title: v.name,
             subtitle: v.description,
             images: v.images,
-            prices: v.prices.map(p => ({id: p.id, amount: p.unit_amount})),
+            prices: v.prices.filter(p => p.active).map(p => ({id: p.id, amount: p.unit_amount})),
             type: v.metadata.type,
             longDescription: v.longDescription
         })),
@@ -104,7 +104,7 @@ exports.productDetails = functions.https.onRequest(async (req, resp) => {
         name: product.name,
         images: product.images,
         unit_label: product.unit_label,
-        prices: prices.data.map(v => ({id: v.id, amount: v.unit_amount, transform: v.transform_quantity})),
+        prices: prices.data.filter(p => p.active).map(v => ({id: v.id, amount: v.unit_amount, transform: v.transform_quantity})),
         type: product.metadata.type,
         type_description: typeDesc,
     });
@@ -126,7 +126,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
             id: v.id,
             name: v.name,
             images: v.images,
-            prices: v.prices.data.map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
+            prices: v.prices.data.filter(p => p.active).map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
             description: v.description,
         })), shipping: 40};
 })
