@@ -73,10 +73,16 @@ const ProductPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('')
     const handleProductNumChange = () => {
-        setTotalProductNum(() => {
-                const cart = JSON.parse(window.localStorage.getItem('cart'));
-                return cart.reduce((total, item) => total + parseInt(item.num), 0);
-            });
+        const cart = JSON.parse(window.localStorage.getItem('cart'));
+        const num = cart.reduce((total, item) => total + parseInt(item.num), 0);
+        setTotalProductNum(() => num);
+        analytics.logEvent('add_to_cart', {
+            item_id: product.id,
+            item_name: product.title,
+            price: product.prices.filter(v => !v.transform)[0].amount/100,
+            currency: 'nok',
+            quantity: num
+        })
     }
     const {id} = useParams();
 
@@ -257,13 +263,6 @@ const Controls = (props) => {
         const cartJSON = JSON.stringify(cart);
         console.log(cartJSON)
         window.localStorage.setItem('cart', cartJSON);
-        analytics.logEvent('add_to_cart', {
-            item_id: props.id,
-            item_name: props.title,
-            price: props.prices.filter(v => !v.transform)[0].amount/100,
-            currency: 'nok',
-            quantity: num
-        })
         props.onChange();
     }
 
