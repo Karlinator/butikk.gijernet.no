@@ -5,16 +5,17 @@ import Controls from "./Controls";
 import clsx from "clsx";
 import {
     AppBar,
+    Badge,
+    CircularProgress,
+    Container,
     Drawer,
+    Fade,
     Hidden,
     IconButton,
     Toolbar,
     Typography,
     useMediaQuery,
-    useTheme,
-    CircularProgress,
-    Container,
-    Fade, Badge
+    useTheme
 } from "@material-ui/core";
 import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
@@ -92,6 +93,8 @@ const Browse = () => {
     const [overlayOpen, setOverlayOpen] = useState(false);
     const [types, setTypes] = useState([]);
     const [products, setProducts] = useState(null)
+    const [filters, setFilters] = useState(null)
+    const [search, setSearch] = useState('')
 
     const [totalProductNum, setTotalProductNum] = useState(() => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
@@ -101,11 +104,23 @@ const Browse = () => {
         console.log(totalProductNum)
         setTotalProductNum(totalProductNum => totalProductNum + 1);
     }
+    const handleChange = (id) => () => {
+        setFilters(f => {
+            const newFilters = {...f, [id]: !f[id]}
+            setFeed(<Feed
+                onAddProduct={handleProductNumChange}
+                products={products.filter(v=> newFilters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
+            />);
+            return newFilters
+        })
 
-    const handleFilter = (search, filter) => {
+    }
+    const handleSearch = (e) => {
+        setSearch(s => e.target.value)
         setFeed(<Feed
             onAddProduct={handleProductNumChange}
-            products={products.filter(v=> filter[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}/>);
+            products={products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(e.target.value.toLowerCase()))}
+        />);
     }
 
     const [feed, setFeed] = useState(
@@ -129,6 +144,7 @@ const Browse = () => {
                     setProducts(result.data.products)
                     setFeed(<Feed onAddProduct={handleProductNumChange} products={result.data.products}/>);
                     setTypes(result.data.types)
+                    setFilters(result.data.types.reduce((a, key) => Object.assign(a, {[key]: true}), {}))
                     setLoading(false);
                 },
                 (error) => {
@@ -212,7 +228,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {loading ? '' : <Controls types={types} onChange={handleFilter}/>}
+                    {loading ? '' : <Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
                 </Drawer>
             </Hidden>
             <Hidden only="xs">
@@ -240,7 +256,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {loading ? '' : <Controls types={types} onChange={handleFilter}/>}
+                    {loading ? '' : <Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
                 </Drawer>
             </Hidden>
             <main
