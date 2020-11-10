@@ -133,7 +133,7 @@ const Cart = () => {
     }
 
     const handleCheckout = async () => {
-        if (products.length === 0) {
+        if (products.filter(v => v.quantity > 0).length === 0) {
             setModalTitle("Du kan ikke kjøpe ingenting!");
             setModalContent("Eller, du kan det, men da får du ikke betale")
             setModalOpen(true);
@@ -157,12 +157,6 @@ const Cart = () => {
             })
         });
         request = request.filter(v => v.quantity > 0)
-        if (request.length === 0) {
-            setModalTitle("Du kan ikke kjøpe ingenting!");
-            setModalContent("Eller, du kan det, men da får du ikke betale")
-            setModalOpen(true);
-            return;
-        }
 
         let response
 
