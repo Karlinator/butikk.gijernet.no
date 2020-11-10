@@ -241,7 +241,9 @@ const Controls = (props) => {
     const [num, setNum] = useState(0);
 
     const handleNumChange = (event) => {
-        setNum(event.target.value)
+        if (event.target.value >= 0 && !isNaN(parseInt(event.target.value)) && !event.target.value.includes('-')) {
+            setNum(event.target.value)
+        }
     }
 
     const handleAddToCart = () => {
