@@ -111,7 +111,7 @@ const Browse = ( {products} ) => {
         setSearch(e.target.value)
         setFeed(<Feed
             onAddProduct={handleProductNumChange}
-            products={products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(e.target.value.toLowerCase()))}
+            products={products.products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(e.target.value.toLowerCase()))}
         />);
 
     }
