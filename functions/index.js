@@ -15,9 +15,11 @@ exports.products = functions.https.onRequest(async (req, resp) => {
 
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
     //TODO: page through if more than 100 products
-    const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}});
-    const prices = await stripe.prices.list({limit: 100, created: {gt: 1569567232}});
-    let productsWithPrices = products.data.map(v => ({...v, prices: prices.data.filter(p => v.id === p.product && !p.transform_quantity)}))
+    const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
+    console.log(products)
+    const prices = await stripe.prices.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
+    //TODO: If I ever get Package Pricing to work with Checkout, remove && !p.transform_quantity.
+    let productsWithPrices = products.map(v => ({...v, prices: prices.filter(p => v.id === p.product && !p.transform_quantity)}))
     let types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
     productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
@@ -59,7 +61,7 @@ exports.products = functions.https.onRequest(async (req, resp) => {
             title: v.name,
             subtitle: v.description,
             images: v.images,
-            prices: v.prices.filter(p => p.active).map(p => ({id: p.id, amount: p.unit_amount})),
+            prices: v.prices.map(p => ({id: p.id, amount: p.unit_amount})),
             type: v.metadata.type,
             longDescription: v.longDescription
         })),
@@ -68,48 +70,48 @@ exports.products = functions.https.onRequest(async (req, resp) => {
 })
 
 
-exports.productDetails = functions.https.onRequest(async (req, resp) => {
-    db = db || admin.firestore();
-
-    let product
-
-    try {
-        product = await stripe.products.retrieve(req.query.id.toString())
-    } catch (e) {
-        resp.status(e.statusCode).send(e.message)
-    }
-
-    const productDescDoc = await db.collection('products').doc(product.id).get()
-    const typeDescDoc = await db.collection('types').doc(product.metadata.type).get()
-    const prices = await stripe.prices.list({product: req.query.id.toString()})
-
-    let productDesc;
-    try {
-        productDesc = productDescDoc.data().description
-    } catch {
-        productDesc = '';
-    }
-    let typeDesc;
-    try {
-        typeDesc = typeDescDoc.data().description
-    } catch {
-        typeDesc = ''
-    }
-
-    resp.header('Cache-Control', cache)
-    resp.status(200).send({
-        id: product.id,
-        description: product.description,
-        longDescription: productDesc,
-        name: product.name,
-        images: product.images,
-        unit_label: product.unit_label,
-        prices: prices.data.filter(p => p.active).map(v => ({id: v.id, amount: v.unit_amount, transform: v.transform_quantity})),
-        type: product.metadata.type,
-        type_description: typeDesc,
-    });
-
-})
+// exports.productDetails = functions.https.onRequest(async (req, resp) => {
+//     db = db || admin.firestore();
+//
+//     let product
+//
+//     try {
+//         product = await stripe.products.retrieve(req.query.id.toString())
+//     } catch (e) {
+//         resp.status(e.statusCode).send(e.message)
+//     }
+//
+//     const productDescDoc = await db.collection('products').doc(product.id).get()
+//     const typeDescDoc = await db.collection('types').doc(product.metadata.type).get()
+//     const prices = await stripe.prices.list({product: req.query.id.toString()})
+//
+//     let productDesc;
+//     try {
+//         productDesc = productDescDoc.data().description
+//     } catch {
+//         productDesc = '';
+//     }
+//     let typeDesc;
+//     try {
+//         typeDesc = typeDescDoc.data().description
+//     } catch {
+//         typeDesc = ''
+//     }
+//
+//     resp.header('Cache-Control', cache)
+//     resp.status(200).send({
+//         id: product.id,
+//         description: product.description,
+//         longDescription: productDesc,
+//         name: product.name,
+//         images: product.images,
+//         unit_label: product.unit_label,
+//         prices: prices.data.filter(p => p.active).map(v => ({id: v.id, amount: v.unit_amount, transform: v.transform_quantity})),
+//         type: product.metadata.type,
+//         type_description: typeDesc,
+//     });
+//
+// })
 
 /**
  * Provides details (name, price, etc) on a list of prices.
@@ -139,8 +141,8 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
         payment_method_types: ['card'],
         line_items: data,
         mode: "payment",
-        success_url: "https://store.gijernet.no/takk",
-        cancel_url: "https://store.gijernet.no/avbrutt",
+        success_url: "https://butikk.gijernet.no/takk",
+        cancel_url: "https://butikk.gijernet.no/cart",
         billing_address_collection: 'auto',
         shipping_address_collection: {
             allowed_countries: ['NO']
