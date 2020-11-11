@@ -8,6 +8,7 @@ const stripe = require('stripe')(functions.config().stripe.key, {
 let db;
 
 const cache = 'public'
+const enableCache = functions.config().cache.enable === 'true'
 const expires = () => {
     const date = new Date()
     date.setUTCHours(23,59,59,999)
@@ -21,8 +22,7 @@ const filterTransform = true
 exports.products = functions.https.onRequest(async (req, resp) => {
     db = db || admin.firestore();
 
-    //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
-    //TODO: page through if more than 100 products
+
     const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
     //console.log(products)
     const prices = await stripe.prices.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
@@ -55,9 +55,11 @@ exports.products = functions.https.onRequest(async (req, resp) => {
         }
         return {type: v, description: description}
     }))
-    if (req.query.noCache) {
+    if (req.query.noCache || !enableCache) {
+        console.log('no-store')
         resp.header('Cache-Control', 'no-store')
     } else {
+        console.log('cache')
         resp.header('Cache-Control', cache)
         resp.header('Expires', expires().toUTCString())
     }
@@ -149,7 +151,7 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: data,
-        locale: "no",
+        locale: "nb",
         mode: "payment",
         success_url: "https://butikk.gijernet.no/takk",
         cancel_url: "https://butikk.gijernet.no/cart",
