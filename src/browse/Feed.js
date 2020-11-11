@@ -136,6 +136,7 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
                                     <IconButton
                                         className={clsx(classes.icon, classes.title)}
                                         onClick={e => handleAddToCart(e, tile.id)}
+                                        aria-label="legg i handlevogn"
                                     >
                                         <AddShoppingCart />
                                     </IconButton>
