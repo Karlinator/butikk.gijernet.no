@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import {
     TableCell,
@@ -364,10 +364,10 @@ const CartList = (props) => {
                 <CartListHead />
                     <FadeIn wrapperTag={TableBody} childTag={TableRow} transitionDuration={300}>
                         {props.products.map((row) => (
-                            <>
+                            <Fragment key={row.id}>
                                 <Hidden smDown><CartRowWide row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
                                 <Hidden mdUp><CartRowNarrow row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
-                            </>
+                            </Fragment>
                         ))}
                         <>
                             <Hidden smDown>
