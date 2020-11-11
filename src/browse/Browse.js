@@ -101,7 +101,7 @@ const Browse = ( {products} ) => {
             const newFilters = {...f, [id]: !f[id]}
             setFeed(<Feed
                 onAddProduct={handleProductNumChange}
-                products={products.filter(v=> newFilters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
+                products={products.products.filter(v=> newFilters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
             />);
             return newFilters
         })
