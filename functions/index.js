@@ -9,6 +9,8 @@ let db;
 
 const cache = 'public, max-age=300, s-maxage=600'
 
+const filterTransform = true
+
 
 exports.products = functions.https.onRequest(async (req, resp) => {
     db = db || admin.firestore();
@@ -19,7 +21,7 @@ exports.products = functions.https.onRequest(async (req, resp) => {
     console.log(products)
     const prices = await stripe.prices.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
     //TODO: If I ever get Package Pricing to work with Checkout, remove && !p.transform_quantity.
-    let productsWithPrices = products.map(v => ({...v, prices: prices.filter(p => v.id === p.product && !p.transform_quantity)}))
+    let productsWithPrices = products.map(v => ({...v, prices: prices.filter(p => v.id === p.product && !(filterTransform && p.transform_quantity))}))
     let types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
     productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
@@ -120,7 +122,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
     const productList = data.productList;
 
     //const products = await Promise.all(priceList.map(v => stripe.prices.retrieve(v, {expand: ['product']})));
-    const prices = await Promise.all(productList.map(v => stripe.prices.list({product: v})))
+    const prices = await Promise.all(productList.map(v => stripe.prices.list({product: v, active: true})))
     const products = await Promise.all(productList.map(v => stripe.products.retrieve(v)))
     const productsWithPrices = products.map(v => ({...v, prices: prices.find(p => p.data[0].product === v.id)}))
 
@@ -128,7 +130,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
             id: v.id,
             name: v.name,
             images: v.images,
-            prices: v.prices.data.filter(p => p.active).map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
+            prices: v.prices.data.filter(p => !(filterTransform && p.transform_quantity)).map(p => ({id: p.id, amount: p.unit_amount, transform: p.transform_quantity})),
             description: v.description,
         })), shipping: 40};
 })
@@ -140,6 +142,7 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: data,
+        locale: "no",
         mode: "payment",
         success_url: "https://butikk.gijernet.no/takk",
         cancel_url: "https://butikk.gijernet.no/cart",

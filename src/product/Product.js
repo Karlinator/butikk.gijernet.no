@@ -211,23 +211,25 @@ const Controls = (props) => {
     const [num, setNum] = useState(1);
 
     const handleNumChange = (event) => {
-        if (event.target.value > 0 && !isNaN(parseInt(event.target.value)) && !event.target.value.includes('-')) {
+        if (event.target.value === '' || (event.target.value >= 0 && !isNaN(parseInt(event.target.value)) && !event.target.value.includes('-'))) {
             setNum(event.target.value)
         }
     }
 
     const handleAddToCart = () => {
-        let cart = JSON.parse(window.localStorage.getItem('cart'));
-        const i = cart.findIndex(p => p.id === props.id);
-        if (i !== -1) {
-            cart[i].num = parseInt(cart[i].num) + parseInt(num);
-        } else {
-            cart.push({id: props.id, num: num});
+        if (num > 0) {
+            let cart = JSON.parse(window.localStorage.getItem('cart'));
+            const i = cart.findIndex(p => p.id === props.id);
+            if (i !== -1) {
+                cart[i].num = parseInt(cart[i].num) + parseInt(num);
+            } else {
+                cart.push({id: props.id, num: num});
+            }
+            const cartJSON = JSON.stringify(cart);
+            console.log(cartJSON)
+            window.localStorage.setItem('cart', cartJSON);
+            props.onChange();
         }
-        const cartJSON = JSON.stringify(cart);
-        console.log(cartJSON)
-        window.localStorage.setItem('cart', cartJSON);
-        props.onChange();
     }
 
     return (
