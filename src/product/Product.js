@@ -15,6 +15,7 @@ import {
     Link
 } from "react-router-dom";
 import {analytics} from "../firebase";
+import ImageFadeIn from "react-image-fade-in";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -147,7 +148,7 @@ const Product = (props) => {
         <Container className={classes.root}>
             <Container>
                 <div  style={size.md ? {minHeight: '35vw'} : {minHeight: '46vw'}}>
-                    <img className={classes.coverImg} alt={props.product.title} src={selected} />
+                    <ImageFadeIn opacityTransition={0.3} className={classes.coverImg} alt={props.product.title} src={selected} />
                 </div>
             </Container>
             {props.product.images.filter(i => !i.includes('stripe.com')).length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={props.product.images.length - 1}>
@@ -161,7 +162,7 @@ const Product = (props) => {
                             key={img}
                             onClick={e => handleSelectVariant(e, img)}
                         >
-                            <img className={classes.img} alt="" src={thumb} />
+                            <ImageFadeIn className={classes.img} alt="" src={thumb} />
                         </GridListTile>
                 )})}
             </GridList> : ''}

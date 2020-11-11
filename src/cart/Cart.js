@@ -23,6 +23,7 @@ import {Link} from "react-router-dom";
 import { loadStripe } from '@stripe/stripe-js';
 import {analytics, functions} from "../firebase";
 import clsx from 'clsx'
+import FadeIn from 'react-fade-in';
 
 const useStyles = makeStyles((theme) => ({
     table: {
@@ -45,8 +46,7 @@ const useStyles = makeStyles((theme) => ({
         width: 70,
     },
     center: {
-        marginLeft: '40%',
-        marginTop: 50,
+        marginTop: '15vh',
     },
     order: {
         justifyContent: 'center',
@@ -77,6 +77,9 @@ const useStyles = makeStyles((theme) => ({
         '&:hover': {
             backgroundColor: green[700],
         },
+    },
+    row: {
+        height: 107,
     },
 }));
 
@@ -243,12 +246,17 @@ const Cart = () => {
     })}, [])
 
     const cart = (() => {
+        const cartList = JSON.parse(window.localStorage.getItem('cart'));
         if (loading || products === null) {
             return (
-                <Container className={classes.headline}>
+                <Container align="center" style={{minHeight: cartList.length * (small ? 165 : 140) + (small ? 127 : 183)}} className={classes.headline}>
+                    <Table size={small ? 'small' : 'medium'} className={small ? clsx(classes.table, classes.noPadding) : classes.table}>
+                        <CartListHead/>
+                    </Table>
                     <Fade
                         in={loading}
                         className={classes.center}
+                        size={60}
                         style={{
                             transitionDelay: loading ? '800ms' : '0ms',
                         }}
@@ -324,57 +332,72 @@ const Cart = () => {
     )
 }
 
+const CartListHead = () => {
+    return (
+        <>
+        <Hidden smDown><TableHead>
+            <TableRow>
+                <TableCell style={{width: '70%'}} colSpan={2} align="center">Produkt</TableCell>
+                <TableCell align="center">Antall</TableCell>
+                <TableCell align="center">Enhetspris</TableCell>
+                <TableCell align="center">Pris</TableCell>
+                <TableCell align="center">Fjern</TableCell>
+            </TableRow>
+        </TableHead></Hidden>
+        <Hidden mdUp><TableHead>
+            <TableRow>
+                <TableCell colSpan={2} align="center"><Typography variant="subtitle1">Handlevogn</Typography></TableCell>
+            </TableRow>
+        </TableHead></Hidden>
+        </>
+    )
+}
+
 const CartList = (props) => {
     const classes = useStyles();
     const theme = useTheme()
     const small = useMediaQuery(theme.breakpoints.down('sm'))
 
     return (
-        <TableContainer>
+        <TableContainer style={{paddingBottom: 20}}>
             <Table size={small ? 'small' : 'medium'} className={small ? clsx(classes.table, classes.noPadding) : classes.table}>
-                <Hidden smDown><TableHead>
-                    <TableRow>
-                        <TableCell colSpan={2} align="center">Produkt</TableCell>
-                        <TableCell align="center">Antall</TableCell>
-                        <TableCell align="center">Enhetspris</TableCell>
-                        <TableCell align="center">Pris</TableCell>
-                        <TableCell align="center">Fjern</TableCell>
-                    </TableRow>
-                </TableHead></Hidden>
-                <Hidden mdUp><TableHead>
-                    <TableRow>
-                        <TableCell colSpan={2} align="center"><Typography variant="subtitle1">Handlevogn</Typography></TableCell>
-                    </TableRow>
-                </TableHead></Hidden>
-                <TableBody>
-                    {props.products.map((row) => (
-                        <TableRow key={row.id}>
-                            <Hidden smDown><CartRowWide row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
-                            <Hidden mdUp><CartRowNarrow row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
-                        </TableRow>
-                    ))}
-                    <Hidden smDown>
-                        <TableRow>
-                            <TableCell rowSpan={3} colSpan={3} />
-                            <TableCell align="center">Frakt:</TableCell>
-                            <TableCell align="center">{props.shipping}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell align="center">Total:</TableCell>
-                            <TableCell align="center">{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
-                        </TableRow>
-                    </Hidden>
-                    <Hidden mdUp>
-                        <TableRow>
-                            <TableCell align="center">Frakt:</TableCell>
-                            <TableCell align="center">{props.shipping}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell align="center">Total:</TableCell>
-                            <TableCell align="center">{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
-                        </TableRow>
-                    </Hidden>
-                </TableBody>
+                <CartListHead />
+                    <FadeIn wrapperTag={TableBody} childTag={TableRow} transitionDuration={300}>
+                        {props.products.map((row) => (
+                            <>
+                                <Hidden smDown><CartRowWide row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
+                                <Hidden mdUp><CartRowNarrow row={row} onChange={props.onChange} onRemove={props.onRemove}/></Hidden>
+                            </>
+                        ))}
+                        <>
+                            <Hidden smDown>
+                                <TableCell colSpan={3} />
+                                <TableCell align="center">Frakt:</TableCell>
+                                <TableCell align="center">kr{props.shipping}</TableCell>
+                                <TableCell/>
+                            </Hidden>
+                        </>
+                        <>
+                            <Hidden smDown>
+                                <TableCell colSpan={3} />
+                                <TableCell align="center">Total:</TableCell>
+                                <TableCell align="center">kr{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
+                                <TableCell/>
+                            </Hidden>
+                        </>
+                        <>
+                            <Hidden mdUp>
+                                <TableCell align="center">Frakt:</TableCell>
+                                <TableCell align="center">{props.shipping}</TableCell>
+                            </Hidden>
+                        </>
+                        <>
+                            <Hidden mdUp>
+                                <TableCell align="center">Total:</TableCell>
+                                <TableCell align="center">{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
+                            </Hidden>
+                        </>
+                </FadeIn>
             </Table>
         </TableContainer>
     )
@@ -390,7 +413,7 @@ const CartRowWide = (props) => {
     const classes = useStyles();
     return (
         <>
-            <TableCell align="center"><img alt="" className={classes.img} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
+            <TableCell className={classes.row} align="center"><img alt="" className={classes.img} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
             <TableCell align="center">
                 <Typography variant="body1">{row.name}</Typography>
                 <Typography variant="body2">{row.description}</Typography>
@@ -405,8 +428,8 @@ const CartRowWide = (props) => {
                     onChange={e => props.onChange(e, row.id)}
                 />
             </TableCell>
-            <TableCell align="center">{row.price.price.transform ? row.price.price.amount/100+" pr "+row.price.price.transform.divide_by : row.price.price.amount/100}</TableCell>
-            <TableCell align="center">{row.price.amount/100}</TableCell>
+            <TableCell align="center">kr{row.price.price.transform ? row.price.price.amount/100+" pr "+row.price.price.transform.divide_by : row.price.price.amount/100}</TableCell>
+            <TableCell align="center">kr{row.price.amount/100}</TableCell>
             <TableCell align="center">
                 <IconButton
                     onClick={e => props.onRemove(e, row.id)}
@@ -423,7 +446,7 @@ const CartRowNarrow = (props) => {
     const row = props.row
     return (
         <>
-            <TableCell className={classes.noPadding} colSpan={4}>
+            <TableCell style={{height: 152}} className={classes.noPadding} colSpan={4}>
                 <TableRow>
                     <TableCell padding="none" className={classes.noBorder} align="center"><img alt="" className={classes.smallImg} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
                     <TableCell padding="none" colSpan={3} className={classes.noBorder} align="center">
