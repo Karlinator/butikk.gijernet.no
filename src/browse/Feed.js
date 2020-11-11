@@ -6,7 +6,7 @@ import {Link} from "react-router-dom";
 import { useHistory } from 'react-router-dom';
 import clsx from "clsx";
 import {analytics} from "../firebase";
-import { LazyLoadImage, trackWindowScroll } from 'react-lazy-load-image-component';
+import { LazyLoadImage, trackWindowScroll, LazyLoadComponent } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 
 
@@ -110,36 +110,38 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
         <GridList cols={getGridListCols()} spacing={16} className={classes.gridList}>
             {products.map((tile) => (
                 <GridListTile className={classes.tile} key={tile.id} rows={1.3}>
-                    <Link to={'/'+tile.id}>
-                        <LazyLoadImage
-                            effect="opacity"
-                            scrollPosition={scrollPosition}
-                            className={classes.img}
-                            src={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {
-                                const n = i.lastIndexOf('/')
-                                return i.slice(0, n+1) + "thumb_" + i.slice(n+1)
-                            })[0]}
-                            alt={tile.alt}/>
-                    </Link>
-                        <GridListTileBar
-                            id={tile.id}
-                            title={tile.title}
-                            subtitle={cartList.find(v => tile.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.prices[0].amount/100}
-                            classes={{
-                                root: clsx(classes.clickable, classes.titleBar),
-                                title: classes.title,
-                                subtitle: classes.title,
-                            }}
-                            onClick={e => handleGotoProduct(e, tile.id)}
-                            actionIcon={
-                                <IconButton
-                                    className={clsx(classes.icon, classes.title)}
-                                    onClick={e => handleAddToCart(e, tile.id)}
-                                >
-                                    <AddShoppingCart />
-                                </IconButton>
-                            }
-                        />
+                    <LazyLoadComponent threshold={300} scrollPosition={scrollPosition}>
+                        <Link to={'/'+tile.id}>
+                            <LazyLoadImage
+                                effect="opacity"
+                                scrollPosition={scrollPosition}
+                                className={classes.img}
+                                src={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {
+                                    const n = i.lastIndexOf('/')
+                                    return i.slice(0, n+1) + "thumb_" + i.slice(n+1)
+                                })[0]}
+                                alt={tile.alt}/>
+                        </Link>
+                            <GridListTileBar
+                                id={tile.id}
+                                title={tile.title}
+                                subtitle={cartList.find(v => tile.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.prices[0].amount/100}
+                                classes={{
+                                    root: clsx(classes.clickable, classes.titleBar),
+                                    title: classes.title,
+                                    subtitle: classes.title,
+                                }}
+                                onClick={e => handleGotoProduct(e, tile.id)}
+                                actionIcon={
+                                    <IconButton
+                                        className={clsx(classes.icon, classes.title)}
+                                        onClick={e => handleAddToCart(e, tile.id)}
+                                    >
+                                        <AddShoppingCart />
+                                    </IconButton>
+                                }
+                            />
+                    </LazyLoadComponent>
                 </GridListTile>
             ))}
         </GridList>
