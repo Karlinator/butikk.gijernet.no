@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     AppBar,
     Container,
@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
     forms: {
         marginTop: 25,
         marginBottom: 25,
-        marginRight: 40
+        width: 220,
     },
     headline: {
         flexGrow: 1,
@@ -84,6 +84,10 @@ const ProductPage = ({products}) => {
     const {id} = useParams();
     const product = products.products.find(v => v.id === id)
     console.log(product)
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     return(
         <div className={classes.bottom}>
@@ -142,7 +146,7 @@ const Product = (props) => {
     return (
         <Container className={classes.root}>
             <Container>
-                <div  style={{minHeight: 'calc(75vw/2)'}}>
+                <div  style={size.md ? {minHeight: '35vw'} : {minHeight: '46vw'}}>
                     <img className={classes.coverImg} alt={props.product.title} src={selected} />
                 </div>
             </Container>
@@ -162,7 +166,7 @@ const Product = (props) => {
                 )})}
             </GridList> : ''}
             <Container>
-                <Typography variant="h3" component="h1">{props.product.title}</Typography>
+                <Typography variant="h4" component="h1">{props.product.title}</Typography>
                 <Typography variant="h5" component="h3">{props.product.subtitle}</Typography>
                 <Typography variant="h4" component="h2">
                     kr {props.product.prices.filter(v => !v.transform)[0].amount/100}
@@ -203,10 +207,10 @@ const Product = (props) => {
 const Controls = (props) => {
     const classes = useStyles();
 
-    const [num, setNum] = useState(0);
+    const [num, setNum] = useState(1);
 
     const handleNumChange = (event) => {
-        if (event.target.value >= 0 && !isNaN(parseInt(event.target.value)) && !event.target.value.includes('-')) {
+        if (event.target.value > 0 && !isNaN(parseInt(event.target.value)) && !event.target.value.includes('-')) {
             setNum(event.target.value)
         }
     }
@@ -227,7 +231,7 @@ const Controls = (props) => {
 
     return (
         <Paper variant="outlined">
-            <Container>
+            <Container align="center">
                 <TextField
                     variant="outlined"
                     type="number"
