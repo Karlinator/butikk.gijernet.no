@@ -1,4 +1,4 @@
-import React, {lazy, Suspense} from "react";
+import React, {lazy, Suspense, useEffect, useState} from "react";
 import {
     BrowserRouter as Router,
     Switch,
@@ -10,7 +10,8 @@ import Browse from "./browse/Browse";
 import {analytics} from "./firebase";
 import CookieKit from 'react-cookie-kit'
 import 'react-cookie-kit/dist/xck-react-theme-popup.css'
-import {CircularProgress, Fade} from "@material-ui/core";
+import {AppBar, CircularProgress, Fade, IconButton, Toolbar, Typography} from "@material-ui/core";
+import {FilterList} from "@material-ui/icons";
 const Admin = lazy(() => import("./admin/Admin"));
 
 function App() {
@@ -27,35 +28,79 @@ function App() {
             console.log('analytics disabled')
         }
     }
+
+    const [products, setProducts] = useState(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        fetch('/api/products/')
+            .then(res => res.json())
+            .then(
+                result => {
+                    setProducts(result)
+                    setLoading(false)
+                },
+                (error) => {
+                    console.log(error)
+                }
+            )
+    }, []);
+
+    if(loading) {
+        return (
+            <div align="center" style={{flexGrow: 1}}>
+                <AppBar position="sticky">
+                    <Toolbar>
+                        <IconButton color="inherit">
+                            <FilterList/>
+                        </IconButton>
+                        <Typography variant="h6" noWrap>
+                            Gi Jernet Nettbutikk
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
+                <Fade
+                    in
+                    style={{
+                        transitionDelay: '800ms',
+                        marginTop: '35vh',
+                    }}
+                    unmountOnExit
+                >
+                    <CircularProgress size={80} />
+                </Fade>
+            </div>
+        )
+    }
+
     return (
         <div className="App">
             <Router>
                 <Switch>
                     <Route path="/cart">
-                        <Cart />
+                        <Cart products={products} />
                     </Route>
                     <Route path="/admin">
                         <Suspense fallback={
-                            <div style={{flexGrow: 1}}>
+                            <div align="center" style={{flexGrow: 1}}>
                                 <Fade
                                     in
                                     style={{
                                         transitionDelay: '800ms',
-                                        marginLeft: '40%',
-                                        marginTop: 50,
+                                        marginTop: '35vh',
                                     }}
                                     unmountOnExit
                                 >
-                                    <CircularProgress />
+                                    <CircularProgress size={80} />
                                 </Fade>
                             </div>
                         }>
                             <Admin />
                         </Suspense>
                     </Route>
-                    <Route path="/:id" children={<ProductPage />}/>
+                    <Route path="/:id" children={<ProductPage products={products} />}/>
                     <Route path="/">
-                        <Browse />
+                        <Browse products={products} />
                     </Route>
                 </Switch>
             </Router>

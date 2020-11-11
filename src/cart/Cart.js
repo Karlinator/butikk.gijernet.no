@@ -274,6 +274,9 @@ const Cart = () => {
                     <IconButton component={Link} to="/" color="inherit" edge="start" aria-label="tilbake">
                         <ArrowBack />
                     </IconButton>
+                    <Typography variant="h6" noWrap>
+                        Gi Jernet Nettbutikk
+                    </Typography>
                 </Toolbar>
             </AppBar>
             <Container className={small ? classes.noPadding : null}>

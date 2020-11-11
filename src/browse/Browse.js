@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import Feed from "./Feed";
 import {makeStyles} from "@material-ui/core/styles";
 import Controls from "./Controls";
@@ -6,10 +6,7 @@ import clsx from "clsx";
 import {
     AppBar,
     Badge,
-    CircularProgress,
-    Container,
     Drawer,
-    Fade,
     Hidden,
     IconButton,
     Toolbar,
@@ -82,24 +79,23 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
-const Browse = () => {
+const Browse = ( {products} ) => {
     const classes = useStyles();
     const [open, setOpen] = useState(true);
-    const [loading, setLoading] = useState(true);
     const [overlayOpen, setOverlayOpen] = useState(false);
-    const [types, setTypes] = useState([]);
-    const [products, setProducts] = useState(null)
-    const [filters, setFilters] = useState(null)
+    const [types] = useState(products.types.map(v => v.type));
+    const [filters, setFilters] = useState(products.types.reduce((a, key) => Object.assign(a, {[key.type]: true}), {}))
     const [search, setSearch] = useState('')
-
     const [totalProductNum, setTotalProductNum] = useState(() => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
         return cart.reduce((total, item) => total + parseInt(item.num), 0);
     });
+
     const handleProductNumChange = () => {
         console.log(totalProductNum)
         setTotalProductNum(totalProductNum => totalProductNum + 1);
     }
+    const [feed, setFeed] = useState(<Feed onAddProduct={handleProductNumChange} products={products.products}/>);
     const handleChange = (id) => () => {
         setFilters(f => {
             const newFilters = {...f, [id]: !f[id]}
@@ -117,41 +113,8 @@ const Browse = () => {
             onAddProduct={handleProductNumChange}
             products={products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(e.target.value.toLowerCase()))}
         />);
+
     }
-
-    const [feed, setFeed] = useState(
-        <Container className={classes.headline}>
-            <Fade
-                in={loading}
-                className={classes.center}
-                style={{
-                    transitionDelay: loading ? '800ms' : '0ms',
-                }}
-                unmountOnExit
-            >
-                <CircularProgress />
-            </Fade>
-        </Container>);
-
-    useEffect(() => {
-        fetch('/api/products/')
-            .then(res => res.json())
-            .then(
-                result => {
-                    setProducts(result.products)
-                    setFeed(<Feed onAddProduct={handleProductNumChange} products={result.products}/>);
-                    setTypes(result.types.map(v => v.type))
-                    setFilters(result.types.reduce((a, key) => Object.assign(a, {[key.type]: true}), {}))
-                    setLoading(false);
-                },
-                (error) => {
-                    setLoading(false);
-                    console.log(error)
-                    setFeed(<span>{error.toString()}</span>);
-                }
-            )
-    // eslint-disable-next-line
-    }, []);
 
 
 
@@ -225,7 +188,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {loading ? '' : <Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
                 </Drawer>
             </Hidden>
             <Hidden only="xs">
@@ -253,7 +216,7 @@ const Browse = () => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {loading ? '' : <Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
                 </Drawer>
             </Hidden>
             <main

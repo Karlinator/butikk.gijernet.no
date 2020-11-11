@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {
     AppBar,
     Container,
@@ -6,7 +6,7 @@ import {
     GridListTile,
     IconButton,
     Toolbar,
-    Typography, Grid, Paper, TextField, Button, Hidden, Badge, Fade, CircularProgress, useMediaQuery, useTheme
+    Typography, Grid, Paper, TextField, Button, Hidden, Badge, useMediaQuery, useTheme
 } from "@material-ui/core";
 import {AddShoppingCart, ArrowBack, ShoppingCart} from "@material-ui/icons"
 import {makeStyles} from "@material-ui/core/styles";
@@ -63,15 +63,12 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const ProductPage = () => {
+const ProductPage = ({products}) => {
     const classes = useStyles();
     const [totalProductNum, setTotalProductNum] = useState(() => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
         return cart.reduce((total, item) => total + parseInt(item.num), 0);
     });
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('')
     const handleProductNumChange = () => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
         const num = cart.reduce((total, item) => total + parseInt(item.num), 0);
@@ -85,48 +82,8 @@ const ProductPage = () => {
         })
     }
     const {id} = useParams();
-
-
-    useEffect(() => {
-        fetch('/api/productDetails?id='+id)
-            .then(res => res.json())
-            .then(res => {
-                setLoading(false)
-                setProduct(res)
-            })
-            .catch((res) => {
-                console.log(res)
-                setError(res.message)
-                })
-    // eslint-disable-next-line
-    }, [])
-
-    const content = (() => {
-        if ((loading || product === null) && !error) {
-            return (
-                <Container className={classes.headline}>
-                    <Fade
-                        in={loading}
-                        className={classes.center}
-                        style={{
-                            transitionDelay: loading ? '800ms' : '0ms',
-                        }}
-                        unmountOnExit
-                    >
-                        <CircularProgress/>
-                    </Fade>
-                </Container>
-            )
-        } else if (error !== '') {
-            return <Container className={classes.headline}>
-                    <Typography className={classes.center} variant="body1">
-                        Det skjedde en feil: {error}
-                    </Typography>
-                </Container>
-        } else {
-            return <Product onChange={handleProductNumChange} product={product} />
-        }
-    })();
+    const product = products.products.find(v => v.id === id)
+    console.log(product)
 
     return(
         <div className={classes.bottom}>
@@ -151,7 +108,7 @@ const ProductPage = () => {
                     </IconButton>
                 </Toolbar>
             </AppBar>
-            {content}
+            <Product onChange={handleProductNumChange} product={product}/>
         </div>
     )
 }
@@ -185,7 +142,9 @@ const Product = (props) => {
     return (
         <Container className={classes.root}>
             <Container>
-                <img className={classes.coverImg} alt={props.product.title} src={selected} />
+                <div  style={{minHeight: 'calc(75vw/2)'}}>
+                    <img className={classes.coverImg} alt={props.product.title} src={selected} />
+                </div>
             </Container>
             {props.product.images.filter(i => !i.includes('stripe.com')).length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={props.product.images.length - 1}>
                 {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => {
@@ -203,8 +162,8 @@ const Product = (props) => {
                 )})}
             </GridList> : ''}
             <Container>
-                <Typography variant="h3" component="h1">{props.product.name}</Typography>
-                <Typography variant="h5" component="h3">{props.product.description}</Typography>
+                <Typography variant="h3" component="h1">{props.product.title}</Typography>
+                <Typography variant="h5" component="h3">{props.product.subtitle}</Typography>
                 <Typography variant="h4" component="h2">
                     kr {props.product.prices.filter(v => !v.transform)[0].amount/100}
                     {props.product.prices.length > 1
