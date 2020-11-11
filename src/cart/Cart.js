@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
     },
     smallImg: {
         maxHeight: 80,
+        maxWidth: '100%'
     },
     noBorder: {
         borderBottom: 'none',
@@ -249,7 +250,7 @@ const Cart = () => {
         const cartList = JSON.parse(window.localStorage.getItem('cart'));
         if (loading || products === null) {
             return (
-                <Container align="center" style={{minHeight: cartList.length * (small ? 165 : 140) + (small ? 127 : 183)}} className={classes.headline}>
+                <Container aria-labelledby="cart-loading" aria-busy={true} align="center" style={{minHeight: cartList.length * (small ? 165 : 140) + (small ? 127 : 183)}} className={classes.headline}>
                     <Table size={small ? 'small' : 'medium'} className={small ? clsx(classes.table, classes.noPadding) : classes.table}>
                         <CartListHead/>
                     </Table>
@@ -262,7 +263,7 @@ const Cart = () => {
                         }}
                         unmountOnExit
                     >
-                        <CircularProgress />
+                        <CircularProgress id="cart-loading" />
                     </Fade>
                 </Container>
             )
@@ -277,7 +278,7 @@ const Cart = () => {
 
     return (
         <div>
-            <AppBar position="sticky">
+            <AppBar aria-label="navigasjon" position="sticky">
                 <Toolbar>
                     <IconButton component={Link} to="/" color="inherit" edge="start" aria-label="tilbake">
                         <ArrowBack />
@@ -447,15 +448,15 @@ const CartRowNarrow = (props) => {
     return (
         <>
             <TableCell style={{height: 152}} className={classes.noPadding} colSpan={4}>
-                <TableRow>
-                    <TableCell padding="none" className={classes.noBorder} align="center"><img alt="" className={classes.smallImg} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></TableCell>
-                    <TableCell padding="none" colSpan={3} className={classes.noBorder} align="center">
+                <Grid container alignItems="flex-start">
+                    <Grid item xs={5} padding="none" className={classes.noBorder} align="center"><img alt="" className={classes.smallImg} src={row.images.filter(i => !i.includes('stripe.com')).length > 0 ? insertThumb(row.images.filter(i => !i.includes('stripe.com'))[0]) : row.images[0]}/></Grid>
+                    <Grid item xs={7} padding="none" colSpan={3} className={classes.noBorder} align="center">
                         <Typography variant="body1">{row.name}</Typography>
                         <Typography variant="body2">{row.description}</Typography>
-                    </TableCell>
-                </TableRow>
-                <TableRow>
-                    <TableCell padding="none" width={50} className={classes.noBorder} align="center">
+                    </Grid>
+                </Grid>
+                <Grid container alignItems="center">
+                    <Grid item xs={4} padding="none" className={classes.noBorder} align="center">
                         <TextField
                             className={classes.number}
                             variant="outlined"
@@ -464,9 +465,9 @@ const CartRowNarrow = (props) => {
                             value={row.quantity}
                             onChange={e => props.onChange(e, row.id)}
                         />
-                    </TableCell>
-                    <TableCell padding="none" className={classes.noBorder} align="center"><Typography variant="body2">kr{row.price.price.transform ? row.price.price.amount/100+" pr "+row.price.price.transform.divide_by : row.price.price.amount/100 + ' pr stk'}</Typography></TableCell>
-                    <TableCell padding="none" className={classes.noBorder} align="center">
+                    </Grid>
+                    <Grid item xs={4} padding="none" className={classes.noBorder} align="center"><Typography variant="body2">kr{row.price.price.transform ? row.price.price.amount/100+" pr "+row.price.price.transform.divide_by : row.price.price.amount/100 + ' pr stk'}</Typography></Grid>
+                    <Grid item xs={4} padding="none" className={classes.noBorder} align="center">
                         <Typography variant="body2">
                             kr{row.price.amount/100}
                             <IconButton
@@ -475,8 +476,8 @@ const CartRowNarrow = (props) => {
                                 <RemoveShoppingCart />
                             </IconButton>
                         </Typography>
-                    </TableCell>
-                </TableRow>
+                    </Grid>
+                </Grid>
             </TableCell>
         </>
     )
