@@ -7,7 +7,13 @@ const stripe = require('stripe')(functions.config().stripe.key, {
 
 let db;
 
-const cache = 'public, max-age=300, s-maxage=600'
+const cache = 'public'
+const expires = () => {
+    const date = new Date()
+    date.setUTCHours(23,59,59,999)
+    return date
+}
+
 
 const filterTransform = true
 
@@ -18,7 +24,7 @@ exports.products = functions.https.onRequest(async (req, resp) => {
     //const prices = await stripe.prices.list({active: true, expand: ['data.product']});
     //TODO: page through if more than 100 products
     const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
-    console.log(products)
+    //console.log(products)
     const prices = await stripe.prices.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
     //TODO: If I ever get Package Pricing to work with Checkout, remove && !p.transform_quantity.
     let productsWithPrices = products.map(v => ({...v, prices: prices.filter(p => v.id === p.product && !(filterTransform && p.transform_quantity))}))
@@ -53,6 +59,7 @@ exports.products = functions.https.onRequest(async (req, resp) => {
         resp.header('Cache-Control', 'no-store')
     } else {
         resp.header('Cache-Control', cache)
+        resp.header('Expires', expires().toUTCString())
     }
 
     //prices.data.forEach(v => console.log(v.product.images));
