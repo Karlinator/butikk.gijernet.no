@@ -11,7 +11,7 @@ const Controls = (props) => {
                 {props.types.map(v => (
                     <FormControlLabel
                         key={v}
-                        control={<Checkbox checked={props.filters[v]} onChange={props.handleChange(v)} name={v} />}
+                        control={<Checkbox color={"primary"} checked={props.filters[v]} onChange={props.handleChange(v)} name={v} />}
                         label={v}
                     />
                 ))}
