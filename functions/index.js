@@ -55,6 +55,17 @@ exports.products = functions.https.onRequest(async (req, resp) => {
         }
         return {type: v, description: description}
     }))
+
+    productsWithPrices.sort((a, b) =>{
+        if (a.metadata.type > b.metadata.type) {
+            return 1
+        } else if (a.metadata.type < b.metadata.type) {
+            return -1
+        }
+        return a.name <= b.name ? -1 : 1
+
+    })
+
     if (req.query.noCache || !enableCache) {
         console.log('no-store')
         resp.header('Cache-Control', 'no-store')
