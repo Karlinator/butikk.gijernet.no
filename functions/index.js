@@ -7,7 +7,7 @@ const stripe = require('stripe')(functions.config().stripe.key, {
 
 let db;
 
-const cache = 'public'
+const cache = 'public, max-age=300, s-maxage=600'
 const enableCache = functions.config().cache.enable === 'true'
 const expires = () => {
     const date = new Date()
@@ -72,7 +72,7 @@ exports.products = functions.https.onRequest(async (req, resp) => {
     } else {
         console.log('cache')
         resp.header('Cache-Control', cache)
-        resp.header('Expires', expires().toUTCString())
+        //resp.header('Expires', expires().toUTCString())
     }
 
     //prices.data.forEach(v => console.log(v.product.images));
