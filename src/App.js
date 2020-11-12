@@ -12,6 +12,7 @@ import CookieKit from 'react-cookie-kit'
 import 'react-cookie-kit/dist/xck-react-theme-popup.css'
 import {AppBar, CircularProgress, Fade, IconButton, Toolbar, Typography} from "@material-ui/core";
 import {FilterList} from "@material-ui/icons";
+import Privacy from "./Privacy";
 const Admin = lazy(() => import("./admin/Admin"));
 
 function App() {
@@ -97,6 +98,9 @@ function App() {
                         }>
                             <Admin />
                         </Suspense>
+                    </Route>
+                    <Route path="/privacy">
+                        <Privacy />
                     </Route>
                     <Route path="/:id" children={<ProductPage products={products} />}/>
                     <Route path="/">
