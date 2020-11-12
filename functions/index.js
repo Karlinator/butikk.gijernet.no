@@ -31,11 +31,11 @@ exports.products = functions.https.onRequest(async (req, resp) => {
     let types = [...new Set(productsWithPrices.map(v => v.metadata.type))]
 
     productsWithPrices = await Promise.all(productsWithPrices.map(async p => {
-        const productDesc = await db.collection('products').doc(p.id).get()
         //console.log(productDesc)
         let description;
         //console.log(p.name, productDesc.data())
         try {
+            const productDesc = await db.collection('products').doc(p.id).get()
             description = productDesc.data().description
         } catch {
             description = ''
@@ -44,11 +44,11 @@ exports.products = functions.https.onRequest(async (req, resp) => {
 
     }))
     types = await Promise.all(types.map(async v => {
-        const typeDesc = await db.collection('types').doc(v).get()
         //console.log(productDesc)
         let description;
         //console.log(p.name, productDesc.data())
         try {
+            const typeDesc = await db.collection('types').doc(v).get()
             description = typeDesc.data().description
         } catch {
             description = ''
