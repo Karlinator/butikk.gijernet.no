@@ -5,13 +5,64 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "src/**",
+      "public/**"
     ],
     "rewrites": [
+      {
+        "source": "/api/products",
+        "function": "products"
+      },
+      {
+        "source": "/api/productDetails",
+        "function": "productDetails"
+      },
+      {
+        "source": "/api/cartDetails",
+        "function": "cartDetails"
+      },
+      {
+        "source": "/api/checkout",
+        "function": "checkout"
+      },
+      {
+        "source": "/api/addProductDetails",
+        "function": "addProductDetails"
+      },
       {
         "source": "**",
         "destination": "/index.html"
       }
     ]
+  },
+  "functions": {
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run lint"
+    ],
+    "source": "functions"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "auth": {
+      "enabled": true,
+      "port": 9099
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }

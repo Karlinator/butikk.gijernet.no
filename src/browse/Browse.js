@@ -3,25 +3,22 @@ import Feed from "./Feed";
 import {makeStyles} from "@material-ui/core/styles";
 import Controls from "./Controls";
 import clsx from "clsx";
-import {AppBar, CssBaseline, Drawer, IconButton, Toolbar, Typography} from "@material-ui/core";
-import {Clear, FilterList} from "@material-ui/icons";
+import {
+    AppBar,
+    Badge,
+    Drawer,
+    Hidden,
+    IconButton,
+    Toolbar,
+    Typography,
+    useMediaQuery,
+    useTheme
+} from "@material-ui/core";
+import {Clear, FilterList, ShoppingCart} from "@material-ui/icons";
+import {Link} from "react-router-dom";
 
 const drawerWidth = 240;
 
-const testData = {
-    products: [
-        {title: 'test', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test2', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test3', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test4', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test5', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test6', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test7', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test8', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test9', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-        {title: 'test10', subtitle: 'Lorem Ipsum', img: '/logo512.png'},
-    ]
-}
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -31,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
         marginRight: theme.spacing(2),
     },
     appBar: {
-        zIndex: theme.zIndex.drawer + 1,
+        zIndex: theme.zIndex.drawer + 1
     },
     hide: {
         display: 'none',
@@ -62,6 +59,7 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.leavingScreen,
         }),
         marginLeft: -drawerWidth,
+        marginTop: 50
     },
     contentShift: {
         transition: theme.transitions.create('margin', {
@@ -69,20 +67,72 @@ const useStyles = makeStyles((theme) => ({
             duration: theme.transitions.duration.enteringScreen,
         }),
         marginLeft: 0,
+        marginTop: 50
     },
+    headline: {
+        flexGrow: 1,
+    },
+    center: {
+        marginLeft: '40%',
+        marginTop: 50,
+    }
+
 }));
 
-const Browse = () => {
+const Browse = ( {products} ) => {
     const classes = useStyles();
     const [open, setOpen] = useState(true);
+    const [overlayOpen, setOverlayOpen] = useState(false);
+    const [types] = useState(products.types.map(v => v.type));
+    const [filters, setFilters] = useState(products.types.reduce((a, key) => Object.assign(a, {[key.type]: true}), {}))
+    const [search, setSearch] = useState('')
+    const [totalProductNum, setTotalProductNum] = useState(() => {
+        const cart = JSON.parse(window.localStorage.getItem('cart'));
+        return cart.reduce((total, item) => total + parseInt(item.num), 0);
+    });
+
+    const handleProductNumChange = () => {
+        console.log(totalProductNum)
+        setTotalProductNum(totalProductNum => totalProductNum + 1);
+    }
+    const [feed, setFeed] = useState(<Feed onAddProduct={handleProductNumChange} products={products.products}/>);
+    const handleChange = (id) => () => {
+        setFilters(f => {
+            const newFilters = {...f, [id]: !f[id]}
+            setFeed(<Feed
+                onAddProduct={handleProductNumChange}
+                products={products.products.filter(v=> newFilters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
+            />);
+            return newFilters
+        })
+
+    }
+    const handleSearch = (e) => {
+        setSearch(e.target.value)
+        setFeed(<Feed
+            onAddProduct={handleProductNumChange}
+            products={products.products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(e.target.value.toLowerCase()))}
+        />);
+
+    }
+
+
+
+    const theme = useTheme();
+    const small = useMediaQuery(theme.breakpoints.down("xs"));
 
     const handleDrawerToggle = () => {
-        setOpen(!open);
+        console.log(small);
+        if (!small) {
+            setOpen(!open);
+        } else {
+            setOpen(true);
+            setOverlayOpen(!overlayOpen)
+        }
     };
 
     return (
         <div className={classes.root}>
-            <CssBaseline />
             <AppBar
                 position="fixed"
                 className={clsx(classes.appBar)}
@@ -97,43 +147,84 @@ const Browse = () => {
                     >
                         <FilterList />
                     </IconButton>
-                    <Typography variant="h6" noWrap>
+                    <Typography variant="h6" noWrap className={classes.headline}>
                         Gi Jernet Nettbutikk
                     </Typography>
-                </Toolbar>
-            </AppBar>
-            <Drawer
-                className={classes.drawer}
-                variant="persistent"
-                anchor="left"
-                open={open}
-                classes={{
-                    paper: classes.drawerPaper,
-                }}
-            >
-                <Toolbar/>
-                <Toolbar className={classes.drawerHeader}>
-                    <Typography
-                        variant="h5"
-                    >
-                        Søkefilter
-                    </Typography>
                     <IconButton
-                        onClick={handleDrawerToggle}
+                        component={Link}
+                        to="/cart"
+                        color="inherit"
+                        aria-label="handlevogn"
                         edge="end"
-                        className={classes.menuButton}
                     >
-                        <Clear />
+                        <Badge color="secondary" badgeContent={totalProductNum}>
+                            <ShoppingCart />
+                        </Badge>
                     </IconButton>
                 </Toolbar>
-                <Controls/>
-            </Drawer>
+            </AppBar>
+            <Hidden smUp>
+                <Drawer
+                    className={classes.drawer}
+                    variant="temporary"
+                    anchor="left"
+                    open={overlayOpen}
+                    classes={{
+                        paper: classes.drawerPaper,
+                    }}
+                >
+                    <Toolbar/>
+                    <Toolbar className={classes.drawerHeader}>
+                        <Typography
+                            variant="h5"
+                        >
+                            Søkefilter
+                        </Typography>
+                        <IconButton
+                            onClick={handleDrawerToggle}
+                            edge="end"
+                            className={classes.menuButton}
+                        >
+                            <Clear />
+                        </IconButton>
+                    </Toolbar>
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
+                </Drawer>
+            </Hidden>
+            <Hidden only="xs">
+                <Drawer
+                    className={classes.drawer}
+                    variant="persistent"
+                    anchor="left"
+                    open={open}
+                    classes={{
+                        paper: classes.drawerPaper,
+                    }}
+                >
+                    <Toolbar/>
+                    <Toolbar className={classes.drawerHeader}>
+                        <Typography
+                            variant="h5"
+                        >
+                            Søkefilter
+                        </Typography>
+                        <IconButton
+                            onClick={handleDrawerToggle}
+                            edge="end"
+                            className={classes.menuButton}
+                        >
+                            <Clear />
+                        </IconButton>
+                    </Toolbar>
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
+                </Drawer>
+            </Hidden>
             <main
                 className={clsx(classes.content, {
                     [classes.contentShift]: open,
                 })}
             >
-                <Feed products={testData.products}/>
+                {feed}
             </main>
         </div>
     )
