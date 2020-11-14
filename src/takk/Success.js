@@ -12,6 +12,7 @@ const useStyles = makeStyles(() => ({
 
 const Success = () => {
     const classes = useStyles()
+    localStorage.setItem('cart', '')
     return (
         <div>
             <AppBar aria-label="navigasjon" position="sticky">

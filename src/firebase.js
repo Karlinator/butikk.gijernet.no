@@ -9,7 +9,8 @@ const firebaseConfig = {
     projectId: "gijernet-no",
     storageBucket: "gijernet-no.appspot.com",
     messagingSenderId: "869445831132",
-    appId: "1:869445831132:web:ef4c96796a07a851e66719"
+    appId: "1:869445831132:web:ef4c96796a07a851e66719",
+    measurementId: "G-1FKMHYSSX2"
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
