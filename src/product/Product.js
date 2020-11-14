@@ -102,6 +102,7 @@ const ProductPage = ({products}) => {
                     </Typography>
                     <IconButton
                         component={Link}
+                        id="go-to-cart"
                         to="/cart"
                         color="inherit"
                         aria-label="handlevogn"
