@@ -133,7 +133,6 @@ function App() {
                 privacyUrl="/privacy"
                 termsUrl="/terms"
                 requestDataTypes={['statistics', 'application']}
-                detectCountry={true}
                 hideBrandTag={true}
                 testMode={process.env.NODE_ENV !== 'production'}
                 textMessage="Vi bruker cookies for at betalingsløsningen skal fungere, og for statistikk hvis du godtar det."
