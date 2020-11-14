@@ -99,6 +99,14 @@ function App() {
                             <Admin />
                         </Suspense>
                     </Route>
+                    <Route path="/takk">
+                        <div align="center">
+                            <Typography variant="h4">Takk for handelen!</Typography>
+                            <Typography variant="body1">
+                                Pengene går rett tilbake til Nepal/Himalaya og arbeidet der. <a href="https://gijernet.no/om-butikken">Les mer.</a>
+                            </Typography>
+                        </div>
+                    </Route>
                     <Route path="/privacy">
                         <Privacy />
                     </Route>
