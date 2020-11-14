@@ -14,6 +14,7 @@ import {AppBar, CircularProgress, Fade, IconButton, Toolbar, Typography} from "@
 import {FilterList} from "@material-ui/icons";
 import Privacy from "./Privacy";
 const Admin = lazy(() => import("./admin/Admin"));
+const Success = lazy(() => import("./takk/Success"))
 
 function App() {
     if (!window.localStorage.getItem('cart') || JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('price'))) {
@@ -100,12 +101,22 @@ function App() {
                         </Suspense>
                     </Route>
                     <Route path="/takk">
-                        <div align="center">
-                            <Typography variant="h4">Takk for handelen!</Typography>
-                            <Typography variant="body1">
-                                Pengene går rett tilbake til Nepal/Himalaya og arbeidet der. <a href="https://gijernet.no/om-butikken">Les mer.</a>
-                            </Typography>
-                        </div>
+                        <Suspense fallback={
+                            <div align="center" style={{flexGrow: 1}}>
+                                <Fade
+                                    in
+                                    style={{
+                                        transitionDelay: '800ms',
+                                        marginTop: '35vh',
+                                    }}
+                                    unmountOnExit
+                                >
+                                    <CircularProgress size={80} />
+                                </Fade>
+                            </div>
+                        }>
+                            <Success/>
+                        </Suspense>
                     </Route>
                     <Route path="/privacy">
                         <Privacy />
