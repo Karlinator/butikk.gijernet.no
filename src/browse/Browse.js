@@ -184,6 +184,7 @@ const Browse = ( {products} ) => {
                             onClick={handleDrawerToggle}
                             edge="end"
                             className={classes.menuButton}
+                            aria-label={"lukk søkefilter"}
                         >
                             <Clear />
                         </IconButton>
@@ -212,6 +213,7 @@ const Browse = ( {products} ) => {
                             onClick={handleDrawerToggle}
                             edge="end"
                             className={classes.menuButton}
+                            aria-label={"lukk søkefilter"}
                         >
                             <Clear />
                         </IconButton>
