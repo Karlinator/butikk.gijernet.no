@@ -20,7 +20,7 @@ import {
 import {ArrowBack, RemoveShoppingCart} from "@material-ui/icons";
 import { green } from '@material-ui/core/colors';
 import {Link} from "react-router-dom";
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js/pure';
 import {analytics, functions} from "../firebase";
 import clsx from 'clsx'
 import FadeIn from 'react-fade-in';
