@@ -239,6 +239,7 @@ const Controls = (props) => {
                     variant="outlined"
                     type="number"
                     label="Antall"
+                    id="amount"
                     size="small"
                     value={num}
                     onChange={handleNumChange}
@@ -247,6 +248,7 @@ const Controls = (props) => {
                 <Button
                     variant="contained"
                     color="primary"
+                    id="add-to-cart"
                     startIcon={<AddShoppingCart/>}
                     className={classes.forms}
                     onClick={handleAddToCart}
