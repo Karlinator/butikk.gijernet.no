@@ -12,10 +12,12 @@ import {
 import {makeStyles} from "@material-ui/core/styles";
 import {Delete, Image, Save} from "@material-ui/icons";
 import 'firebase/auth'
-import firebase, {storage, firebaseConfig, functions} from "../firebase";
+import 'firebase/storage'
+import firebase, {firebaseConfig, functions} from "../firebase";
 import {FirebaseAuthConsumer, FirebaseAuthProvider} from "@react-firebase/auth";
 import {green} from "@material-ui/core/colors";
 const auth = firebase.auth()
+const storage = firebase.storage()
 
 const useStyles = makeStyles(() => ({
     headline: {

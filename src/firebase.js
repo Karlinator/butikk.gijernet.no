@@ -1,5 +1,4 @@
 import firebase from 'firebase/app'
-import 'firebase/storage'
 import 'firebase/functions'
 import 'firebase/analytics'
 
@@ -16,8 +15,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const analytics = firebase.analytics();
 
-const storage = firebase.storage()
-
 const functions = firebase.app().functions('europe-west1')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -25,6 +22,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export  {
-    storage, firebaseConfig, functions, analytics, firebase as default
+    firebaseConfig, functions, analytics, firebase as default
 }
 
