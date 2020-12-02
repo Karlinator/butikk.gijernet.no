@@ -84,7 +84,7 @@ const Browse = ( {products} ) => {
     const [open, setOpen] = useState(true);
     const [overlayOpen, setOverlayOpen] = useState(false);
     const [types] = useState(products.types.map(v => v.type));
-    const [filters, setFilters] = useState(products.types.reduce((a, key) => Object.assign(a, {[key.type]: true}), {}))
+    const [filters, setFilters] = useState(products.types.reduce((a, key) => Object.assign(a, {[key.type]: false}), {}))
     const [search, setSearch] = useState('')
     const [totalProductNum, setTotalProductNum] = useState(() => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
@@ -99,21 +99,28 @@ const Browse = ( {products} ) => {
     const handleChange = (id) => () => {
         setFilters(f => {
             const newFilters = {...f, [id]: !f[id]}
-            setFeed(<Feed
-                onAddProduct={handleProductNumChange}
-                products={products.products.filter(v=> newFilters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
-            />);
+            filterFeed(newFilters)
             return newFilters
         })
 
     }
     const handleSearch = (e) => {
         setSearch(e.target.value)
-        setFeed(<Feed
-            onAddProduct={handleProductNumChange}
-            products={products.products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(e.target.value.toLowerCase()))}
-        />);
+        filterFeed(filters)
+    }
 
+    const filterFeed = (newFilters) => {
+        if (Object.entries(newFilters).every(v => !v[1])) {
+            setFeed(<Feed
+                onAddProduct={handleProductNumChange}
+                products={products.products.filter(v=> v.title.toLowerCase().includes(search.toLowerCase()))}
+            />);
+        } else {
+            setFeed(<Feed
+                onAddProduct={handleProductNumChange}
+                products={products.products.filter(v=> newFilters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
+            />);
+        }
     }
 
 
