@@ -169,7 +169,8 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
         billing_address_collection: 'auto',
         shipping_address_collection: {
             allowed_countries: ['NO']
-        }
+        },
+        allow_promotion_codes: true
     })
         return {id: session.id}
     } catch (error) {
