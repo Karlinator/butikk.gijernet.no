@@ -5,7 +5,7 @@ import {AddShoppingCart, ShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
 import { useHistory } from 'react-router-dom';
 import clsx from "clsx";
-import {analytics} from "../firebase";
+//import {analytics} from "../firebase";
 import { LazyLoadImage, trackWindowScroll, LazyLoadComponent } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 
@@ -84,7 +84,7 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
     const handleAddToCart = (e, id) => {
         e.stopPropagation();
         onAddProduct();
-        const product = products.find(i => i.id === id)
+        //const product = products.find(i => i.id === id)
         let cart = JSON.parse(window.localStorage.getItem('cart'));
         const i = cart.findIndex(p => p.id === id);
         if (i !== -1) {
@@ -93,13 +93,13 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
             cart.push({id: id, num: 1});
         }
         setCartList(cart);
-        analytics.logEvent('add_to_cart', {
-            item_id: id,
-            item_name: product.title,
-            price: product.prices.filter(v => !v.transform)[0].amount/100,
-            currency: 'nok',
-            quantity: 1
-        })
+        // analytics.logEvent('add_to_cart', {
+        //     item_id: id,
+        //     item_name: product.title,
+        //     price: product.prices.filter(v => !v.transform)[0].amount/100,
+        //     currency: 'nok',
+        //     quantity: 1
+        // })
         const cartJSON = JSON.stringify(cart);
         console.log(cartJSON)
         window.localStorage.setItem('cart', cartJSON);

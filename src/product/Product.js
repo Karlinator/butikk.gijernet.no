@@ -14,7 +14,7 @@ import {
     useParams,
     Link
 } from "react-router-dom";
-import {analytics} from "../firebase";
+//import {analytics} from "../firebase";
 import ImageFadeIn from "react-image-fade-in";
 
 const useStyles = makeStyles((theme) => ({
@@ -74,13 +74,13 @@ const ProductPage = ({products}) => {
         const cart = JSON.parse(window.localStorage.getItem('cart'));
         const num = cart.reduce((total, item) => total + parseInt(item.num), 0);
         setTotalProductNum(() => num);
-        analytics.logEvent('add_to_cart', {
-            item_id: product.id,
-            item_name: product.title,
-            price: product.prices.filter(v => !v.transform)[0].amount/100,
-            currency: 'nok',
-            quantity: num
-        })
+        // analytics.logEvent('add_to_cart', {
+        //     item_id: product.id,
+        //     item_name: product.title,
+        //     price: product.prices.filter(v => !v.transform)[0].amount/100,
+        //     currency: 'nok',
+        //     quantity: num
+        // })
     }
     const {id} = useParams();
     const product = products.products.find(v => v.id === id)

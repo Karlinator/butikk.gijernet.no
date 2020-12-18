@@ -7,8 +7,7 @@ import {
 import ProductPage from "./product/Product";
 import Cart from "./cart/Cart";
 import Browse from "./browse/Browse";
-import {analytics} from "./firebase";
-import CookieKit from 'react-cookie-kit'
+//import CookieKit from 'react-cookie-kit'
 import 'react-cookie-kit/dist/xck-react-theme-popup.css'
 import {AppBar, CircularProgress, Fade, IconButton, Toolbar, Typography} from "@material-ui/core";
 import {FilterList} from "@material-ui/icons";
@@ -20,16 +19,16 @@ function App() {
     if (!window.localStorage.getItem('cart') || JSON.parse(window.localStorage.getItem('cart')).find(v => v.id.includes('price'))) {
         window.localStorage.setItem('cart', '[]')
     }
-    const cookieHandler = (consent) => {
-        console.log(consent)
-        if (consent.statistics) {
-            analytics.setAnalyticsCollectionEnabled(true)
-            console.log('analytics enabled')
-        } else {
-            analytics.setAnalyticsCollectionEnabled(false)
-            console.log('analytics disabled')
-        }
-    }
+    // const cookieHandler = (consent) => {
+    //     console.log(consent)
+    //     if (consent.statistics) {
+    //         analytics.setAnalyticsCollectionEnabled(true)
+    //         console.log('analytics enabled')
+    //     } else {
+    //         analytics.setAnalyticsCollectionEnabled(false)
+    //         console.log('analytics disabled')
+    //     }
+    // }
 
     const [products, setProducts] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -127,16 +126,16 @@ function App() {
                     </Route>
                 </Switch>
             </Router>
-            <CookieKit
-                cssAutoLoad={true}
-                cookieHandler={cookieHandler}
-                privacyUrl="/privacy"
-                termsUrl="/terms"
-                requestDataTypes={['statistics', 'application']}
-                hideBrandTag={true}
-                testMode={process.env.NODE_ENV !== 'production'}
-                textMessage="Vi bruker cookies for at betalingsløsningen skal fungere, og for statistikk hvis du godtar det."
-            />
+            {/*<CookieKit*/}
+            {/*    cssAutoLoad={true}*/}
+            {/*    cookieHandler={cookieHandler}*/}
+            {/*    privacyUrl="/privacy"*/}
+            {/*    termsUrl="/terms"*/}
+            {/*    requestDataTypes={['statistics', 'application']}*/}
+            {/*    hideBrandTag={true}*/}
+            {/*    testMode={process.env.NODE_ENV !== 'production'}*/}
+            {/*    textMessage="Vi bruker cookies for at betalingsløsningen skal fungere, og for statistikk hvis du godtar det."*/}
+            {/*/>*/}
         </div>
     );
 }

@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const analytics = firebase.analytics();
+//const analytics = firebase.analytics();
 
 const functions = firebase.app().functions('europe-west1')
 
@@ -23,6 +23,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export  {
-    firebaseConfig, functions, analytics, firebase as default
+    firebaseConfig, functions, firebase as default
 }
 
