@@ -91,15 +91,6 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
                                 component={Link}
                                 to={'/'+tile.id}
                             >
-                                {/*<LazyLoadImage*/}
-                                {/*    effect="opacity"*/}
-                                {/*    scrollPosition={scrollPosition}*/}
-                                {/*    className={classes.img}*/}
-                                {/*    src={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {*/}
-                                {/*        const n = i.lastIndexOf('/')*/}
-                                {/*        return i.slice(0, n+1) + "thumb_" + i.slice(n+1)*/}
-                                {/*    })[0]}*/}
-                                {/*    alt={tile.alt}/>*/}
                                 <CardMedia
                                     className={classes.img}
                                     image={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {
