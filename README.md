@@ -1,3 +1,27 @@
+#Gi Jernet
+
+This repo contains a wrapper for a Stripe-based simple online store,
+developed in React and hosted on Firebase with a backend in node.js Functions.
+
+It was developed for a local Norwegian charity selling items from Nepal
+to raise money for charity work in Nepal. In this spirit of charity,
+I have made the source code available for free.
+
+Feel free to grab inspiration, code, or nothing at all. Or the whole thing.
+
+The site is hosted at [butikk.gijernet.no](https://butikk.gijernet.no).
+
+##NPM config
+
+To run this locally you'll need React and Firebase-tools. `npm dev:react`
+starts the React live builds, `npm dev:firebase` starts the emulators,
+`npm dev` starts both.
+
+Make sure to replace all my keys with your keys, as well as supply
+various secret keys that are obviously not in this public repo.
+The Stripe secret key must be supplied to the Functions backend through
+environment variables.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
