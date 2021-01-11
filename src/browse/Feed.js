@@ -1,12 +1,15 @@
 import React, {useState} from "react";
-import {GridList, GridListTile, GridListTileBar, IconButton, useMediaQuery, useTheme} from "@material-ui/core";
+import {
+    Button,
+    Card, CardActionArea, CardActions, CardContent, CardMedia,
+    Grid,
+    Typography
+} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
-import {AddShoppingCart, ShoppingCart} from "@material-ui/icons";
+import {AddShoppingCart} from "@material-ui/icons";
 import {Link} from "react-router-dom";
-import { useHistory } from 'react-router-dom';
-import clsx from "clsx";
 //import {analytics} from "../firebase";
-import { LazyLoadImage, trackWindowScroll, LazyLoadComponent } from 'react-lazy-load-image-component';
+import { trackWindowScroll, LazyLoadComponent } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/opacity.css';
 
 
@@ -25,8 +28,7 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: theme.palette.background.paper,
     },
     img: {
-        height: 'auto',
-        width: '100%'
+        height: '180px',
     },
     clickable: {
         cursor: 'pointer',
@@ -40,46 +42,19 @@ const useStyles = makeStyles((theme) => ({
     },
     tile: {
         height: '100%',
-    }
+    },
+    actionIcon: {
+        marginRight: 5,
+    },
+    price: {
+        flexGrow: 1,
+        marginLeft: 8,
+    },
 }));
 
 const Feed = ({products, onAddProduct, scrollPosition}) => {
     const classes = useStyles();
-    const history = useHistory();
-    const [cartList, setCartList] = useState(JSON.parse(window.localStorage.getItem('cart')));
-
-    const theme = useTheme();
-    const size = {
-        xl: useMediaQuery(theme.breakpoints.up('xl')),
-        lg: useMediaQuery(theme.breakpoints.up('lg')),
-        md: useMediaQuery(theme.breakpoints.up('md')),
-        sm: useMediaQuery(theme.breakpoints.up('sm')),
-    }
-
-    const getGridListCols = () => {
-        if (size.xl) {
-            return 5;
-        }
-
-        if (size.lg) {
-            return 4;
-        }
-
-        if (size.md) {
-            return 3;
-        }
-
-        if (size.sm) {
-            return 2;
-        }
-
-        return 1;
-    }
-
-
-    const handleGotoProduct = (e, id) => {
-        history.push('/'+id);
-    }
+    const [, setCartList] = useState(JSON.parse(window.localStorage.getItem('cart')));
 
     const handleAddToCart = (e, id) => {
         e.stopPropagation();
@@ -107,45 +82,57 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
 
 
     return (
-        <GridList cols={getGridListCols()} spacing={16} className={classes.gridList}>
+        <Grid container spacing={3}>
             {products.map((tile) => (
-                <GridListTile className={classes.tile} key={tile.id} rows={1.3}>
+                <Grid item xs={12} md={6} lg={4} xl={3} key={tile.id}>
                     <LazyLoadComponent threshold={300} scrollPosition={scrollPosition}>
-                        <Link to={'/'+tile.id}>
-                            <LazyLoadImage
-                                effect="opacity"
-                                scrollPosition={scrollPosition}
-                                className={classes.img}
-                                src={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {
-                                    const n = i.lastIndexOf('/')
-                                    return i.slice(0, n+1) + "thumb_" + i.slice(n+1)
-                                })[0]}
-                                alt={tile.alt}/>
-                        </Link>
-                            <GridListTileBar
-                                id={tile.id}
-                                title={tile.title}
-                                subtitle={cartList.find(v => tile.id === v.id) ? <><ShoppingCart/> i handlevogn</> : 'kr '+tile.prices[0].amount/100}
-                                classes={{
-                                    root: clsx(classes.clickable, classes.titleBar),
-                                    title: classes.title,
-                                    subtitle: classes.title,
-                                }}
-                                onClick={e => handleGotoProduct(e, tile.id)}
-                                actionIcon={
-                                    <IconButton
-                                        className={clsx(classes.icon, classes.title)}
-                                        onClick={e => handleAddToCart(e, tile.id)}
-                                        aria-label="legg i handlevogn"
-                                    >
-                                        <AddShoppingCart />
-                                    </IconButton>
-                                }
-                            />
+                        <Card className={classes.tile}>
+                            <CardActionArea
+                                component={Link}
+                                to={'/'+tile.id}
+                            >
+                                {/*<LazyLoadImage*/}
+                                {/*    effect="opacity"*/}
+                                {/*    scrollPosition={scrollPosition}*/}
+                                {/*    className={classes.img}*/}
+                                {/*    src={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {*/}
+                                {/*        const n = i.lastIndexOf('/')*/}
+                                {/*        return i.slice(0, n+1) + "thumb_" + i.slice(n+1)*/}
+                                {/*    })[0]}*/}
+                                {/*    alt={tile.alt}/>*/}
+                                <CardMedia
+                                    className={classes.img}
+                                    image={tile.images.length === 1 ? tile.images[0] : tile.images.filter(i => !i.includes('stripe.com')).map(i => {
+                                        const n = i.lastIndexOf('/')
+                                        return i.slice(0, n+1) + "thumb_" + i.slice(n+1)
+                                    })[0]}
+                                    alt={tile.alt}
+                                />
+                                <CardContent>
+                                    <Typography gutterBottom variant="h5">
+                                        {tile.title}
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {tile.subtitle}
+                                    </Typography>
+                                </CardContent>
+                            </CardActionArea>
+                            <CardActions>
+                                <Typography variant="h5" className={classes.price}>
+                                    {'kr '+tile.prices[0].amount/100+',-'}
+                                </Typography>
+                                <Button
+                                    color="primary"
+                                    onClick={e => handleAddToCart(e, tile.id)}
+                                >
+                                    <AddShoppingCart className={classes.actionIcon}/> Legg i handlekurv
+                                </Button>
+                            </CardActions>
+                        </Card>
                     </LazyLoadComponent>
-                </GridListTile>
+                </Grid>
             ))}
-        </GridList>
+        </Grid>
     )
 }
 
