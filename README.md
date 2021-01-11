@@ -1,4 +1,4 @@
-#Gi Jernet
+# Gi Jernet
 
 This repo contains a wrapper for a Stripe-based simple online store,
 developed in React and hosted on Firebase with a backend in node.js Functions.
@@ -11,7 +11,7 @@ Feel free to grab inspiration, code, or nothing at all. Or the whole thing.
 
 The site is hosted at [butikk.gijernet.no](https://butikk.gijernet.no).
 
-##NPM config
+## NPM config
 
 To run this locally you'll need React and Firebase-tools. `npm dev:react`
 starts the React live builds, `npm dev:firebase` starts the emulators,
