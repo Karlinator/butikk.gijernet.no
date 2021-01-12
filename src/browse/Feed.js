@@ -50,6 +50,9 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1,
         marginLeft: 8,
     },
+    actionArea: {
+        height: '85%',
+    },
 }));
 
 const Feed = ({products, onAddProduct, scrollPosition}) => {
@@ -88,6 +91,7 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
                     <LazyLoadComponent threshold={300} scrollPosition={scrollPosition}>
                         <Card className={classes.tile}>
                             <CardActionArea
+                                className={classes.actionArea}
                                 component={Link}
                                 to={'/'+tile.id}
                             >
