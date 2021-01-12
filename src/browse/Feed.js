@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: 8,
     },
     actionArea: {
-        height: '85%',
+        height: 'calc(100% - 52.5px)',
     },
 }));
 
