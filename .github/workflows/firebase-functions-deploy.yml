@@ -25,4 +25,4 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           PROJECT_ID: "default"
-          PROJECT_PATH: "./cloud"
+          PROJECT_PATH: "./functions"
