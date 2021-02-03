@@ -7,7 +7,7 @@ const firebaseConfig = {
     authDomain: "gijernet-no.firebaseapp.com",
     databaseURL: "https://gijernet-no.firebaseio.com",
     projectId: "gijernet-no",
-    storageBucket: "gijernet-no.appspot.com",
+    storageBucket: "static.gijernet.no",
     messagingSenderId: "869445831132",
     appId: "1:869445831132:web:ef4c96796a07a851e66719",
     measurementId: "G-1FKMHYSSX2"

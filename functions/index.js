@@ -196,7 +196,7 @@ exports.addProductDetails = functions.region('europe-west1').https.onCall(async 
 
 })
 
-exports.resizeImages = functions.region('europe-west1').storage.object().onFinalize(async (object) => {
+exports.resizeImages = functions.region('europe-west1').storage.bucket('static.gijernet.no').object().onFinalize(async (object) => {
     const spawn = require('child-process-promise').spawn;
     const path = require('path');
     const os = require('os');
