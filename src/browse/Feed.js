@@ -87,7 +87,7 @@ const Feed = ({products, onAddProduct, scrollPosition}) => {
     return (
         <Grid container spacing={3}>
             {products.map((tile) => (
-                <Grid item xs={12} md={6} lg={4} xl={3} key={tile.id}>
+                <Grid item xs={12} md={6} lg={4} xl={3} key={tile.id} id={tile.id}>
                     <LazyLoadComponent threshold={300} scrollPosition={scrollPosition}>
                         <Card className={classes.tile}>
                             <CardActionArea
