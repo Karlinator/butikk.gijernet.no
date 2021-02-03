@@ -196,6 +196,9 @@ exports.addProductDetails = functions.region('europe-west1').https.onCall(async 
 
 })
 
+/**
+ * Triggers when a new image is uploaded to the storage bucket. Creates a thumbnail image, prefixed with "thumb_".
+ */
 exports.resizeImages = functions.region('europe-west1').storage.bucket('static.gijernet.no').object().onFinalize(async (object) => {
     const spawn = require('child-process-promise').spawn;
     const path = require('path');
