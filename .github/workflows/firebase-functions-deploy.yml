@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - 'functions/**'
-      - '.github/firebase-functions-deploy.yml'
+      - '.github/workflows/firebase-functions-deploy.yml'
 
 jobs:
   deploy:
