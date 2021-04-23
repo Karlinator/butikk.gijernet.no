@@ -53,6 +53,8 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
         width: 250,
         marginTop: 20,
+        marginLeft: 10,
+        marginRight: 10,
     },
     back: {
         flexGrow: 1,
@@ -294,10 +296,11 @@ const Cart = () => {
                     <Grid item>
                         <Button
                             className={clsx(classes.order, classes.back)}
-                            variant="contained"
+                            variant="outlined"
                             color="default"
                             component={Link}
                             to="/"
+                            startIcon={<ArrowBack/>}
                         >
                             Fortsett å handle
                         </Button>
