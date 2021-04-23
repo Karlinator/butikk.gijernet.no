@@ -1,10 +1,22 @@
-import React from "react";
-import {Container, TextField, FormGroup, FormLabel, FormControlLabel, Checkbox} from '@material-ui/core';
+import React, {useEffect, useState} from "react";
+import {Container, TextField, FormGroup, FormLabel, FormControlLabel, Checkbox, Button} from '@material-ui/core';
 
 const Controls = (props) => {
+    const [search, setSearch] = useState(props.search)
+    const handleSearch = (e) => {
+        setSearch(e.target.value)
+    }
+    const handleResetControls = () => {
+        setSearch("")
+        props.handleResetControls()
+    }
+    useEffect(() => {
+        const timeOutId = setTimeout(() => props.handleSearch(search), 50);
+        return () => clearTimeout(timeOutId);
+    }, [props, search])
     return(
         <Container>
-            <TextField id="search" variant='filled' label="Søk" value={props.search} onChange={props.handleSearch} />
+            <TextField id="search" variant='filled' label="Søk" value={search} onChange={handleSearch} />
             <br/><br/>
             <FormLabel component="legend">Velg produkttyper</FormLabel>
             <FormGroup>
@@ -16,6 +28,12 @@ const Controls = (props) => {
                     />
                 ))}
             </FormGroup>
+            <Button
+                color="primary"
+                onClick={handleResetControls}
+            >
+                Tilbakestill
+            </Button>
         </Container>
     )
 }

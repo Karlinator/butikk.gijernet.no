@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import Feed from "./Feed";
 import {makeStyles} from "@material-ui/core/styles";
 import Controls from "./Controls";
@@ -91,26 +91,21 @@ const Browse = ( {products} ) => {
         return cart.reduce((total, item) => total + parseInt(item.num), 0);
     });
 
-    const handleProductNumChange = () => {
-        console.log(totalProductNum)
+    const handleProductNumChange = useCallback(() => {
         setTotalProductNum(totalProductNum => totalProductNum + 1);
-    }
+    }, [])
     const [feed, setFeed] = useState(<Feed onAddProduct={handleProductNumChange} products={products.products}/>);
     const handleChange = (id) => () => {
-        setFilters(f => {
-            const newFilters = {...f, [id]: !f[id]}
-            filterFeed(newFilters)
-            return newFilters
-        })
-
-    }
-    const handleSearch = (e) => {
-        setSearch(e.target.value)
-        filterFeed(filters)
+        setFilters(f => ({...f, [id]: !f[id]}))
     }
 
-    const filterFeed = (newFilters) => {
-        if (Object.entries(newFilters).every(v => !v[1])) {
+    const handleResetControls = () => {
+        setFilters(f => Object.fromEntries(Object.entries(f).map(([k]) => [k, false])))
+
+    }
+
+    useEffect(() => {
+        if (Object.entries(filters).every(v => !v[1])) {
             setFeed(<Feed
                 onAddProduct={handleProductNumChange}
                 products={products.products.filter(v=> v.title.toLowerCase().includes(search.toLowerCase()))}
@@ -118,10 +113,11 @@ const Browse = ( {products} ) => {
         } else {
             setFeed(<Feed
                 onAddProduct={handleProductNumChange}
-                products={products.products.filter(v=> newFilters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
+                products={products.products.filter(v=> filters[v.type] && v.title.toLowerCase().includes(search.toLowerCase()))}
             />);
         }
-    }
+    }, [filters, handleProductNumChange, products.products, search]);
+
 
 
 
@@ -196,7 +192,7 @@ const Browse = ( {products} ) => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={setSearch} handleResetControls={handleResetControls}/>}
                 </Drawer>
             </Hidden>
             <Hidden only="xs">
@@ -225,7 +221,7 @@ const Browse = ( {products} ) => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={handleSearch}/>}
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={setSearch} handleResetControls={handleResetControls}/>}
                 </Drawer>
             </Hidden>
             <main
