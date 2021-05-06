@@ -156,7 +156,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
 })
 
 exports.checkout = functions.region('europe-west1').https.onCall(async (data) => {
-    data.push({price_data: {currency: 'nok', product_data: {name: 'Frakt'}, unit_amount: 4000}, quantity: 1})
+    //data.push({price_data: {currency: 'nok', product_data: {name: 'Frakt'}, unit_amount: 4000}, quantity: 1})
     console.log(data)
     try {
     const session = await stripe.checkout.sessions.create({
@@ -167,6 +167,7 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
         success_url: "https://butikk.gijernet.no/takk",
         cancel_url: "https://butikk.gijernet.no/cart",
         billing_address_collection: 'auto',
+        shipping_rates: [functions.config().stripe.shipping],
         shipping_address_collection: {
             allowed_countries: ['NO']
         },
