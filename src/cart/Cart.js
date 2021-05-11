@@ -430,6 +430,7 @@ const CartRowWide = (props) => {
                     size="small"
                     value={row.quantity}
                     onChange={e => props.onChange(e, row.id)}
+                    aria-label="Antall"
                 />
             </TableCell>
             <TableCell align="center">kr{row.price.price.transform ? row.price.price.amount/100+" pr "+row.price.price.transform.divide_by : row.price.price.amount/100}</TableCell>
@@ -437,6 +438,7 @@ const CartRowWide = (props) => {
             <TableCell align="center">
                 <IconButton
                     onClick={e => props.onRemove(e, row.id)}
+                    aria-label="Fjern fra handlevogn"
                 >
                     <RemoveShoppingCart />
                 </IconButton>
