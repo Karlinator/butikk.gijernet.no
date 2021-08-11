@@ -7,7 +7,7 @@ It was developed for a local Norwegian charity selling items from Nepal
 to raise money for charity work in Nepal. In this spirit of charity,
 I have made the source code available for free.
 
-Feel free to grab inspiration, code, or nothing at all. Or the whole thing.
+Feel free to grab inspiration, code, or nothing at all. Or the whole thing. 
 
 The site is hosted at [butikk.gijernet.no](https://butikk.gijernet.no).
 
