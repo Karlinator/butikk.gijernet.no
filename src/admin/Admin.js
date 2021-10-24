@@ -127,12 +127,11 @@ const Admin = () => {
         const imagesRef = Object.entries(pictures).map(v => ({id: v[0], images: v[1].filter(i => i.uri.includes('blob:')).map(i => ({ref: storageRef.child('images/'+v[0]+'/'+i.file.name), file: i.file}))}))
         console.log(imagesRef)
         const storageResult = await Promise.all(imagesRef.map(v => v.images.map(i => i.ref.put(i.file))))
-        const storageError = storageResult.filter(v => v.filter(i => i.error_ !== null).length > 0)
-        if (storageError.length > 0) console.log("Noe gikk kanskje galt her...", storageError, storageResult)
+        console.log(storageResult)
 
         //const request = products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+encodeURI(v.ref.location.path).replaceAll('/', '%2F')+'?alt=media')]}))
         const request = {
-            products: products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://static.gijernet.no/'+encodeURI(v.ref.location.path))]})),
+            products: products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => v.ref.location ? 'https://static.gijernet.no/'+encodeURI(v.ref.location.path) : '')]})),
             types: types.filter(p => p.changed).map(p => ({type: p.type, description: p.description || ''}))
             }
 
