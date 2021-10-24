@@ -131,7 +131,7 @@ const Admin = () => {
 
         //const request = products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://firebasestorage.googleapis.com/v0/b/'+v.ref.location.bucket+'/o/'+encodeURI(v.ref.location.path).replaceAll('/', '%2F')+'?alt=media')]}))
         const request = {
-            products: products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => v.ref.location ? 'https://static.gijernet.no/'+encodeURI(v.ref.location.path) : '')]})),
+            products: products.filter(p => p.changed).map(p => ({id: p.id, description: p.longDescription || '', images: [...p.images, ...imagesRef.find(i => i.id === p.id).images.map(v => 'https://static.gijernet.no/'+encodeURI(v.ref.fullPath))]})),
             types: types.filter(p => p.changed).map(p => ({type: p.type, description: p.description || ''}))
             }
 
