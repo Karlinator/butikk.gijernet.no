@@ -1,14 +1,17 @@
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
-const stripe = require('stripe')(functions.config().stripe.key, {
+import { config, https, region } from 'firebase-functions';
+import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
+import Stripe from 'stripe';
+initializeApp(config().firebase);
+const stripe = new Stripe(config().stripe.key, {
     apiVersion: '2020-08-27',
 });
 
 let db;
 
 const cache = 'public, max-age=300, s-maxage=600'
-const enableCache = functions.config().cache.enable === 'true'
+const enableCache = config().cache.enable === 'true'
 const expires = () => {
     const date = new Date()
     date.setUTCHours(23,59,59,999)
@@ -19,8 +22,8 @@ const expires = () => {
 const filterTransform = true
 
 
-exports.products = functions.https.onRequest(async (req, resp) => {
-    db = db || admin.firestore();
+export const products = https.onRequest(async (req, resp) => {
+    db = db || getFirestore();
 
 
     const products = await stripe.products.list({active: true, limit: 100, created: {gt: 1569567232}}).autoPagingToArray({limit: 10000});
@@ -92,53 +95,7 @@ exports.products = functions.https.onRequest(async (req, resp) => {
 })
 
 
-// exports.productDetails = functions.https.onRequest(async (req, resp) => {
-//     db = db || admin.firestore();
-//
-//     let product
-//
-//     try {
-//         product = await stripe.products.retrieve(req.query.id.toString())
-//     } catch (e) {
-//         resp.status(e.statusCode).send(e.message)
-//     }
-//
-//     const productDescDoc = await db.collection('products').doc(product.id).get()
-//     const typeDescDoc = await db.collection('types').doc(product.metadata.type).get()
-//     const prices = await stripe.prices.list({product: req.query.id.toString()})
-//
-//     let productDesc;
-//     try {
-//         productDesc = productDescDoc.data().description
-//     } catch {
-//         productDesc = '';
-//     }
-//     let typeDesc;
-//     try {
-//         typeDesc = typeDescDoc.data().description
-//     } catch {
-//         typeDesc = ''
-//     }
-//
-//     resp.header('Cache-Control', cache)
-//     resp.status(200).send({
-//         id: product.id,
-//         description: product.description,
-//         longDescription: productDesc,
-//         name: product.name,
-//         images: product.images,
-//         unit_label: product.unit_label,
-//         prices: prices.data.filter(p => p.active).map(v => ({id: v.id, amount: v.unit_amount, transform: v.transform_quantity})),
-//         type: product.metadata.type,
-//         type_description: typeDesc,
-//     });
-//
-// })
-
-/**
- * Provides details (name, price, etc) on a list of prices.
- */
-exports.cartDetails = functions.region('europe-west1').https.onCall(async (data) => {
+export const cartDetails = region('europe-west1').https.onCall(async (data) => {
     const productList = data.productList;
 
     //const products = await Promise.all(priceList.map(v => stripe.prices.retrieve(v, {expand: ['product']})));
@@ -155,7 +112,7 @@ exports.cartDetails = functions.region('europe-west1').https.onCall(async (data)
         })), shipping: 40};
 })
 
-exports.checkout = functions.region('europe-west1').https.onCall(async (data) => {
+export const checkout = region('europe-west1').https.onCall(async (data) => {
     //data.push({price_data: {currency: 'nok', product_data: {name: 'Frakt'}, unit_amount: 4000}, quantity: 1})
     console.log(data)
     try {
@@ -167,7 +124,7 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
         success_url: "https://butikk.gijernet.no/takk",
         cancel_url: "https://butikk.gijernet.no/cart",
         billing_address_collection: 'auto',
-        shipping_rates: [functions.config().stripe.shipping],
+        shipping_rates: [config().stripe.shipping],
         shipping_address_collection: {
             allowed_countries: ['NO']
         },
@@ -180,12 +137,12 @@ exports.checkout = functions.region('europe-west1').https.onCall(async (data) =>
     }
 })
 
-exports.addProductDetails = functions.region('europe-west1').https.onCall(async (data, context) => {
+export const addProductDetails = region('europe-west1').https.onCall(async (data, context) => {
     if (!context.auth) {
         return {message: "Authentication Required", code: 401}
     }
 
-    db = db || admin.firestore();
+    db = db || getFirestore();
 
     await Promise.all(data.products.map(v => stripe.products.update(v.id, {images: v.images})))
 
@@ -197,10 +154,7 @@ exports.addProductDetails = functions.region('europe-west1').https.onCall(async 
 
 })
 
-/**
- * Triggers when a new image is uploaded to the storage bucket. Creates a thumbnail image, prefixed with "thumb_".
- */
-exports.resizeImages = functions.region('europe-west1').storage.bucket('static.gijernet.no').object().onFinalize(async (object) => {
+export const resizeImages = region('europe-west1').storage.bucket('static.gijernet.no').object().onFinalize(async (object) => {
     const spawn = require('child-process-promise').spawn;
     const path = require('path');
     const os = require('os');
@@ -225,7 +179,7 @@ exports.resizeImages = functions.region('europe-west1').storage.bucket('static.g
     }
 
     // Download file from bucket.
-    const bucket = admin.storage().bucket(fileBucket);
+    const bucket = getStorage().bucket(fileBucket);
     const tempFilePath = path.join(os.tmpdir(), fileName);
     const metadata = {
         contentType: contentType,
