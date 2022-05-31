@@ -2,6 +2,7 @@ import { config, https, region } from 'firebase-functions';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { spawn } from 'child-process-promise'
 import Stripe from 'stripe';
 initializeApp(config().firebase);
 const stripe = new Stripe(config().stripe.key, {
@@ -155,10 +156,9 @@ export const addProductDetails = region('europe-west1').https.onCall(async (data
 })
 
 export const resizeImages = region('europe-west1').storage.bucket('static.gijernet.no').object().onFinalize(async (object) => {
-    const spawn = require('child-process-promise').spawn;
-    const path = require('path');
-    const os = require('os');
-    const fs = require('fs');
+    const path = await import('path');
+    const os = await import('os');
+    const fs = await import('fs');
 
 
     const fileBucket = object.bucket; // The Storage bucket that contains the file.
