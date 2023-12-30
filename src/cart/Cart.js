@@ -139,6 +139,7 @@ const Cart = () => {
     }
 
     const handleCheckout = async () => {
+        setLoadingSubmit(true)
         if (products.filter(v => v.quantity > 0).length === 0) {
             setModalTitle("Du kan ikke kjøpe ingenting!");
             setModalContent("Eller, du kan det, men da får du ikke betale")
@@ -148,7 +149,6 @@ const Cart = () => {
         const stripe = await loadStripe(process.env.REACT_APP_STRIPE_KEY)
         const prices = products.map(v => (calculateBestPrice(v.prices, v.quantity)))
         console.log(prices)
-        setLoadingSubmit(true)
         //analytics.logEvent('begin_checkout', {currency: 'nok', items: products.map(v => ({item_id: v.id, item_list_name: v.title, item_category: v.type, quantity: v.quantity, price: v.prices.filter(i => !i.transform)[0].amount/100})), value: prices.reduce((t, c) => t+c.amount, 0)/100})
         console.log(prices)
         let request = [];
