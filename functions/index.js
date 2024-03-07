@@ -2,7 +2,6 @@ import { config, https, region } from "firebase-functions";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
-import { spawn } from "child-process-promise";
 import Stripe from "stripe";
 initializeApp(config().firebase);
 const stripe = new Stripe(config().stripe.key, {
@@ -203,6 +202,7 @@ export const resizeImages = region("europe-west1")
     const path = await import("path");
     const os = await import("os");
     const fs = await import("fs");
+    const sharp = await import("sharp");
 
     const fileBucket = object.bucket; // The Storage bucket that contains the file.
     const filePath = object.name; // File path in the bucket.
@@ -216,10 +216,6 @@ export const resizeImages = region("europe-west1")
 
     // Get the file name.
     const fileName = path.basename(filePath);
-    // Exit if the image is already a thumbnail.
-    if (fileName.startsWith("thumb_")) {
-      return console.log("Already a Thumbnail.");
-    }
 
     // Download file from bucket.
     const bucket = getStorage().bucket(fileBucket);
@@ -229,13 +225,7 @@ export const resizeImages = region("europe-west1")
     };
     await bucket.file(filePath).download({ destination: tempFilePath });
     console.log("Image downloaded locally to", tempFilePath);
-    // Generate a thumbnail using ImageMagick.
-    await spawn("convert", [
-      tempFilePath,
-      "-thumbnail",
-      "300x300>",
-      tempFilePath,
-    ]);
+    await sharp(tempFilePath).rotate().resize(300).toFile(tempFilePath);
     console.log("Thumbnail created at", tempFilePath);
     // We add a 'thumb_' prefix to thumbnails file name. That's where we'll upload the thumbnail.
     const thumbFileName = `thumb_${fileName}`;
