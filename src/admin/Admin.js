@@ -19,6 +19,11 @@ import {green} from "@material-ui/core/colors";
 const auth = firebase.auth()
 const storage = firebase.storage()
 
+if (process.env.NODE_ENV !== 'production') {
+    auth.useEmulator("http://localhost:9099")
+    storage.useEmulator("localhost", 9199)
+}
+
 const useStyles = makeStyles(() => ({
     headline: {
         flexGrow: 1,
