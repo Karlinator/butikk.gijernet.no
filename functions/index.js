@@ -90,7 +90,7 @@ export const products = https.onRequest(async (req, resp) => {
   //prices.data.forEach(v => console.log(v.product.images));
   //console.log(productsWithPrices)
   resp.send({
-    products: productsWithPrices.map((v) => ({
+    products: productsWithPrices.filter((v) => v.prices.length).map((v) => ({
       id: v.id,
       title: v.name,
       subtitle: v.description,
