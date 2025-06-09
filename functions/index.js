@@ -2,6 +2,7 @@ import { config, https, region } from "firebase-functions";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import sharp from "sharp";
 import Stripe from "stripe";
 initializeApp(config().firebase);
 const stripe = new Stripe(config().stripe.key, {
@@ -131,7 +132,7 @@ export const cartDetails = region("europe-west1").https.onCall(async (data) => {
         })),
       description: v.description,
     })),
-    shipping: 40,
+    shipping: 50,
   };
 });
 
@@ -196,13 +197,15 @@ export const addProductDetails = region("europe-west1").https.onCall(
 );
 
 export const resizeImages = region("europe-west1")
+  .runWith({ memory: "512MB" })
   .storage.bucket("static.gijernet.no")
   .object()
   .onFinalize(async (object) => {
+    console.log("Starting function");
     const path = await import("path");
     const os = await import("os");
     const fs = await import("fs");
-    const sharp = await import("sharp");
+    console.log("Finished imports");
 
     const fileBucket = object.bucket; // The Storage bucket that contains the file.
     const filePath = object.name; // File path in the bucket.
@@ -213,25 +216,32 @@ export const resizeImages = region("europe-west1")
     if (!contentType.startsWith("image/")) {
       return console.log("This is not an image.");
     }
+    console.log("This is an image");
 
     // Get the file name.
     const fileName = path.basename(filePath);
+    // Exit if the image is already a thumbnail.
+    if (fileName.startsWith("thumb_")) {
+      return console.log("Already a Thumbnail.");
+    }
 
     // Download file from bucket.
     const bucket = getStorage().bucket(fileBucket);
     const tempFilePath = path.join(os.tmpdir(), fileName);
+    const tempOutFilePath = path.join(os.tmpdir(), "thumb_" + fileName);
     const metadata = {
       contentType: contentType,
     };
+    console.log("Image is at", filePath);
     await bucket.file(filePath).download({ destination: tempFilePath });
     console.log("Image downloaded locally to", tempFilePath);
-    await sharp(tempFilePath).rotate().resize(300).toFile(tempFilePath);
-    console.log("Thumbnail created at", tempFilePath);
     // We add a 'thumb_' prefix to thumbnails file name. That's where we'll upload the thumbnail.
     const thumbFileName = `thumb_${fileName}`;
+    await sharp(tempFilePath).rotate().resize(300).toFile(tempOutFilePath);
+    console.log("Thumbnail created at", tempOutFilePath);
     const thumbFilePath = path.join(path.dirname(filePath), thumbFileName);
     // Uploading the thumbnail.
-    await bucket.upload(tempFilePath, {
+    await bucket.upload(tempOutFilePath, {
       destination: thumbFilePath,
       metadata: metadata,
     });
