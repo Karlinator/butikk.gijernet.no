@@ -6,10 +6,6 @@ const Controls = (props) => {
     const handleSearch = (e) => {
         setSearch(e.target.value)
     }
-    const handleResetControls = () => {
-        setSearch("")
-        props.handleResetControls()
-    }
     useEffect(() => {
         const timeOutId = setTimeout(() => props.handleSearch(search), 50);
         return () => clearTimeout(timeOutId);
@@ -19,6 +15,18 @@ const Controls = (props) => {
             <TextField id="search" variant='filled' label="Søk" value={search} onChange={handleSearch} />
             <br/><br/>
             <FormLabel component="legend">Velg produkttyper</FormLabel>
+            <Button
+                color="primary"
+                onClick={props.handleResetControls}
+            >
+                Tilbakestill
+            </Button>
+            <Button
+                color="primary"
+                onClick={props.handleSelectAll}
+            >
+                Velg Alle
+            </Button>
             <FormGroup>
                 {props.types.map(v => (
                     <FormControlLabel
@@ -28,12 +36,6 @@ const Controls = (props) => {
                     />
                 ))}
             </FormGroup>
-            <Button
-                color="primary"
-                onClick={handleResetControls}
-            >
-                Tilbakestill
-            </Button>
         </Container>
     )
 }

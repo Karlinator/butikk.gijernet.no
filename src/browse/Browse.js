@@ -101,7 +101,9 @@ const Browse = ( {products} ) => {
 
     const handleResetControls = () => {
         setFilters(f => Object.fromEntries(Object.entries(f).map(([k]) => [k, false])))
-
+    }
+    const handleSelectAll = () => {
+        setFilters(f => Object.fromEntries(Object.entries(f).map(([k]) => [k, true])))
     }
 
     useEffect(() => {
@@ -192,7 +194,7 @@ const Browse = ( {products} ) => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={setSearch} handleResetControls={handleResetControls}/>}
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={setSearch} handleSelectAll={handleSelectAll} handleResetControls={handleResetControls}/>}
                 </Drawer>
             </Hidden>
             <Hidden only="xs">
@@ -221,7 +223,7 @@ const Browse = ( {products} ) => {
                             <Clear />
                         </IconButton>
                     </Toolbar>
-                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={setSearch} handleResetControls={handleResetControls}/>}
+                    {<Controls types={types} filters={filters} search={search} handleChange={handleChange} handleSearch={setSearch} handleSelectAll={handleSelectAll} handleResetControls={handleResetControls}/>}
                 </Drawer>
             </Hidden>
             <main
