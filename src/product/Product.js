@@ -172,7 +172,7 @@ const Product = (props) => {
                 <Typography variant="h5" component="h3">{props.product.subtitle}</Typography>
                 <Typography variant="h4" component="h2">
                     kr {props.product.prices.filter(v => !v.transform)[0].amount/100}
-                    {props.product.prices.length > 1
+                    {props.product.prices.filter(v => v.transform).length >= 1
                         ?
                             ', kr '
                             + props.product.prices.filter(v => v.transform)[0].amount/100
