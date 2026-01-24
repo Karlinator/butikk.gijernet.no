@@ -132,7 +132,7 @@ export const cartDetails = region("europe-west1").https.onCall(async (data) => {
         })),
       description: v.description,
     })),
-    shipping: 50,
+    shipping: config().stripe.shipping[0].shipping_rate_data.fixed_amount.amount / 100,
   };
 });
 
