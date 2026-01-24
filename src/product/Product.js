@@ -122,7 +122,9 @@ const ProductPage = ({products}) => {
 const Product = (props) => {
     const classes = useStyles();
 
-    const [selected, setSelected] = useState(props.product.images.filter(i => !i.includes('stripe.com'))[0] || props.product.images[0]);
+    const images = props.product.images.filter(i => !i.includes('stripe.com')) || props.products.images;
+
+    const [selected, setSelected] = useState(images[0]);
 
     const handleSelectVariant = (e, img) => {
         setSelected(img);
@@ -152,8 +154,8 @@ const Product = (props) => {
                     <ImageFadeIn opacityTransition={0.3} className={classes.coverImg} alt={props.product.title} src={selected} />
                 </div>
             </Container>
-            {props.product.images.filter(i => !i.includes('stripe.com')).length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={props.product.images.length - 1}>
-                {props.product.images.filter(i => !i.includes('stripe.com')).map((img) => {
+            {images.length > 1 ? <GridList classes={{root: classes.gridList}} cellHeight={getGridListHeight()} cols={images.length}>
+                {images.map((img) => {
                     const n = img.lastIndexOf('/')
                     const thumb = img.slice(0, n+1) + 'thumb_' + img.slice(n+1)
                     return    (
