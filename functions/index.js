@@ -118,6 +118,8 @@ export const cartDetails = region("europe-west1").https.onCall(async (data) => {
     prices: prices.find((p) => p.data[0].product === v.id),
   }));
 
+  const shipping = await stripe.shippingRates.list({ active: true });
+
   return {
     products: productsWithPrices.map((v) => ({
       id: v.id,
@@ -132,7 +134,7 @@ export const cartDetails = region("europe-west1").https.onCall(async (data) => {
         })),
       description: v.description,
     })),
-    shipping: config().stripe.shipping[0].shipping_rate_data.fixed_amount.amount / 100,
+    shipping: shipping.data[0]?.fixed_amount.amount / 100 ?? 0,
   };
 });
 
@@ -147,7 +149,7 @@ export const checkout = region("europe-west1").https.onCall(async (data) => {
       success_url: "https://butikk.gijernet.no/takk",
       cancel_url: "https://butikk.gijernet.no/cart",
       billing_address_collection: "auto",
-      shipping_rates: [config().stripe.shipping],
+      shipping_rates: [(await stripe.shippingRates.list({ active: true })).data[0].id],
       shipping_address_collection: {
         allowed_countries: ["NO"],
       },
