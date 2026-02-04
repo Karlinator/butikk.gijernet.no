@@ -135,12 +135,14 @@ export const cartDetails = region("europe-west1").https.onCall(async (data) => {
       description: v.description,
     })),
     shipping: shipping.data[0]?.fixed_amount.amount / 100 ?? 0,
+    free_shipping_limit: shipping.data[0]?.metadata.free_shipping_limit ?? 1000,
   };
 });
 
 export const checkout = region("europe-west1").https.onCall(async (data) => {
   //data.push({price_data: {currency: 'nok', product_data: {name: 'Frakt'}, unit_amount: 4000}, quantity: 1})
   console.log(data);
+  const shippingRate = (await stripe.shippingRates.list({ active: true })).data[0];
   try {
     const session = await stripe.checkout.sessions.create({
       line_items: data,
@@ -149,7 +151,7 @@ export const checkout = region("europe-west1").https.onCall(async (data) => {
       success_url: "https://butikk.gijernet.no/takk",
       cancel_url: "https://butikk.gijernet.no/cart",
       billing_address_collection: "auto",
-      shipping_rates: [(await stripe.shippingRates.list({ active: true })).data[0].id],
+      shipping_rates: 100 * (shippingRate.metadata.free_shipping_limit ?? 1000) > (await Promise.all(data.map(async d => d.quantity * (await stripe.prices.retrieve(d.price)).unit_amount))).reduce((a, b) => a + b) ? [shippingRate.id] : [],
       shipping_address_collection: {
         allowed_countries: ["NO"],
       },

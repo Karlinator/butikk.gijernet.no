@@ -108,6 +108,7 @@ const Cart = () => {
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [products, setProducts] = useState(null);
     const [shipping, setShipping] = useState(0);
+    const [freeShippingLimit, setFreeShippingLimit] = useState(0);
 
     // Error modal
     const [modalOpen, setModalOpen] = useState(false);
@@ -245,6 +246,7 @@ const Cart = () => {
                 console.log(result.data)
                 setProducts(list);
                 setShipping(result.data.shipping);
+                setFreeShippingLimit(result.data.free_shipping_limit);
         // eslint-disable-next-line
     })}, [])
 
@@ -274,7 +276,9 @@ const Cart = () => {
                 onRemove={handleRemoveFromCart}
                 onChange={handleCartNumChange}
                 products={products.map(v => ({...v, price: calculateBestPrice(v.prices, v.quantity)}))}
-                shipping={shipping}/>
+                shipping={shipping}
+                freeShippingLimit={freeShippingLimit}
+            />
         }
     })();
 
@@ -362,6 +366,9 @@ const CartList = (props) => {
     const theme = useTheme()
     const small = useMediaQuery(theme.breakpoints.down('sm'))
 
+    const subtotal = props.products.reduce((total, v) => total + v.price.amount, 0)/100;
+    const shipping = subtotal > props.freeShippingLimit ? 0 : props.shipping;
+
     return (
         <TableContainer style={{paddingBottom: 20}}>
             <Table size={small ? 'small' : 'medium'} className={small ? clsx(classes.table, classes.noPadding) : classes.table}>
@@ -377,7 +384,7 @@ const CartList = (props) => {
                             <Hidden smDown>
                                 <TableCell colSpan={3} />
                                 <TableCell align="center">Frakt:</TableCell>
-                                <TableCell align="center">kr{props.shipping}</TableCell>
+                                <TableCell align="center">{shipping ? 'kr' + shipping : 'Gratis'}</TableCell>
                                 <TableCell/>
                             </Hidden>
                         </>
@@ -385,20 +392,20 @@ const CartList = (props) => {
                             <Hidden smDown>
                                 <TableCell colSpan={3} />
                                 <TableCell align="center">Total:</TableCell>
-                                <TableCell align="center">kr{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
+                                <TableCell align="center">kr{shipping + subtotal}</TableCell>
                                 <TableCell/>
                             </Hidden>
                         </>
                         <>
                             <Hidden mdUp>
                                 <TableCell align="center">Frakt:</TableCell>
-                                <TableCell align="center">{props.shipping}</TableCell>
+                                <TableCell align="center">{shipping ? 'kr' + shipping : 'Gratis'}</TableCell>
                             </Hidden>
                         </>
                         <>
                             <Hidden mdUp>
                                 <TableCell align="center">Total:</TableCell>
-                                <TableCell align="center">{props.shipping + props.products.reduce((total, v) => total + v.price.amount, 0)/100}</TableCell>
+                                <TableCell align="center">{shipping + subtotal}</TableCell>
                             </Hidden>
                         </>
                 </FadeIn>
